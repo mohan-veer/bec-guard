@@ -1,0 +1,184 @@
+{
+  "_note": "MOCK web agent (Nemotron Super) turns keyed by Message-ID. Tool calls run against the Tavily mock.",
+  "_default": {
+    "turns": [
+      {
+        "final": {
+          "official_domain": null,
+          "phone": null,
+          "phone_source_url": null
+        }
+      }
+    ]
+  },
+  "<s01-lookalike@acmesuppiy.com>": {
+    "turns": [
+      {
+        "tool_calls": [
+          {
+            "name": "web_search",
+            "arguments": {
+              "query": "Acme Supply official website"
+            }
+          }
+        ]
+      },
+      {
+        "tool_calls": [
+          {
+            "name": "web_search",
+            "arguments": {
+              "query": "Acme Supply contact phone",
+              "include_domains": [
+                "acmesupply.com"
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "final": {
+          "official_domain": "acmesupply.com",
+          "phone": "(503) 555-0142",
+          "phone_source_url": "https://acmesupply.com/contact"
+        }
+      }
+    ]
+  },
+  "<s02-thread@acmesupply.com>": {
+    "turns": [
+      {
+        "tool_calls": [
+          {
+            "name": "web_search",
+            "arguments": {
+              "query": "Acme Supply official website"
+            }
+          }
+        ]
+      },
+      {
+        "tool_calls": [
+          {
+            "name": "web_search",
+            "arguments": {
+              "query": "Acme Supply contact phone",
+              "include_domains": [
+                "acmesupply.com"
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "final": {
+          "official_domain": "acmesupply.com",
+          "phone": "(503) 555-0142",
+          "phone_source_url": "https://acmesupply.com/contact"
+        }
+      }
+    ]
+  },
+  "<s07-pdf@acmesupply.com>": {
+    "turns": [
+      {
+        "tool_calls": [
+          {
+            "name": "web_search",
+            "arguments": {
+              "query": "Acme Supply official website"
+            }
+          }
+        ]
+      },
+      {
+        "tool_calls": [
+          {
+            "name": "web_search",
+            "arguments": {
+              "query": "Acme Supply contact phone",
+              "include_domains": [
+                "acmesupply.com"
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "final": {
+          "official_domain": "acmesupply.com",
+          "phone": "(503) 555-0142",
+          "phone_source_url": "https://acmesupply.com/contact"
+        }
+      }
+    ]
+  },
+  "<s05-newvendor@harbormedsupply.co>": {
+    "turns": [
+      {
+        "tool_calls": [
+          {
+            "name": "web_search",
+            "arguments": {
+              "query": "Harbor Medical Supply official website"
+            }
+          }
+        ]
+      },
+      {
+        "tool_calls": [
+          {
+            "name": "web_search",
+            "arguments": {
+              "query": "Harbor Medical Supply contact phone",
+              "include_domains": [
+                "harbormedicalsupply.com"
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "final": {
+          "official_domain": "harbormedicalsupply.com",
+          "phone": "(206) 555-0198",
+          "phone_source_url": "https://harbormedicalsupply.com/contact"
+        }
+      }
+    ]
+  },
+  "<s06-legit@pacificpaperco.com>": {
+    "turns": [
+      {
+        "tool_calls": [
+          {
+            "name": "web_search",
+            "arguments": {
+              "query": "Pacific Paper Co official website"
+            }
+          }
+        ]
+      },
+      {
+        "tool_calls": [
+          {
+            "name": "web_search",
+            "arguments": {
+              "query": "Pacific Paper Co contact phone",
+              "include_domains": [
+                "pacificpaperco.com"
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "final": {
+          "official_domain": "pacificpaperco.com",
+          "phone": "(503) 555-0163",
+          "phone_source_url": "https://pacificpaperco.com/contact"
+        }
+      }
+    ]
+  }
+}

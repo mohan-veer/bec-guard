@@ -1,0 +1,14 @@
+{
+  "_note": "MOCK RDAP registration dates: YYYY-MM-DD, or 'days_ago:N' (relative to today, so demo 'new' domains stay new). Unlisted domains return None.",
+  "acmesupply.com": "2009-03-17",
+  "acmesuppiy.com": "days_ago:13",
+  "checkingsolutions.com": "2012-06-01",
+  "pacificpaperco.com": "2011-02-20",
+  "brightcleanjanitorial.com": "2015-09-09",
+  "summititservices.com": "2014-04-22",
+  "riverbenddental.com": "2008-11-03",
+  "riverbend-dental.com": "days_ago:6",
+  "harbormedsupply.co": "days_ago:17",
+  "harbormedicalsupply.com": "2004-07-30",
+  "gmail.com": "1995-08-13"
+}

@@ -47,6 +47,7 @@ class PaymentDetails(BaseModel):
     invoice_number: str | None = None
     po: str | None = None
     remit_to: str | None = None
+    found_in: str | None = None   # attachment filename when fields came from the VL model
 
 
 # ---------- Signals and decisions ----------
@@ -73,6 +74,7 @@ class Signal(BaseModel):
     weight: Literal["strong", "medium", "low", "none"] = "none"
     message: str                  # one calm line for the result card
     source: str                   # which model or tool produced it, e.g. "rules", "Nemotron Super", "Tavily"
+    data: dict = {}               # structured extras for the card, e.g. {"phone": ..., "from": ...}
 
 
 class ScoreResult(BaseModel):
@@ -86,6 +88,7 @@ class AnalysisResult(BaseModel):
     decision: Decision | None     # None when Gate 0 finds no money or data request
     rule: str | None
     signals: list[Signal]
+    explanation: str | None = None  # plain-English summary (Ultra/Super), only for VERIFY / UNUSUAL
 
 
 # ---------- Seeded data (data/*.json) ----------

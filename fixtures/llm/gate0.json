@@ -1,11 +1,11 @@
 {
   "_note": "MOCK Gate 0 (Nemotron Nano) responses keyed by Message-ID. _default is used for any other email (e.g. uploads in mock mode).",
-  "_default": {"intent": "payment_request"},
-  "<s01-lookalike@acmesuppiy.com>": {"intent": "payment_request"},
-  "<s02-thread@acmesupply.com>": {"intent": "bank_change"},
-  "<s03-giftcards@mail.gmail.com>": {"intent": "gift_cards"},
-  "<s04-w2@riverbend-dental.com>": {"intent": "data_request"},
-  "<s05-newvendor@harbormedsupply.co>": {"intent": "payment_request"},
-  "<s06-legit@pacificpaperco.com>": {"intent": "payment_request"},
-  "<s07-pdf@acmesupply.com>": {"intent": "bank_change"}
+  "_default": {"intent": "payment_request", "claimed_company": null},
+  "<s01-lookalike@acmesuppiy.com>": {"intent": "payment_request", "claimed_company": "Acme Supply"},
+  "<s02-thread@acmesupply.com>": {"intent": "bank_change", "claimed_company": "Acme Supply"},
+  "<s03-giftcards@mail.gmail.com>": {"intent": "gift_cards", "claimed_company": null},
+  "<s04-w2@riverbend-dental.com>": {"intent": "data_request", "claimed_company": null},
+  "<s05-newvendor@harbormedsupply.co>": {"intent": "payment_request", "claimed_company": "Harbor Medical Supply"},
+  "<s06-legit@pacificpaperco.com>": {"intent": "payment_request", "claimed_company": "Pacific Paper Co"},
+  "<s07-pdf@acmesupply.com>": {"intent": "bank_change", "claimed_company": "Acme Supply"}
 }

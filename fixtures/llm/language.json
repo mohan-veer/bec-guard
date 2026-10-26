@@ -1,0 +1,8 @@
+{
+  "_note": "MOCK language check (Nemotron Super) keyed by Message-ID.",
+  "_default": {},
+  "<s02-thread@acmesupply.com>": {"urgency": true, "quotes": ["Please process today"]},
+  "<s03-giftcards@mail.gmail.com>": {"urgency": true, "secrecy": true, "unusual_request": true, "quotes": ["Please keep this between us for now"]},
+  "<s04-w2@riverbend-dental.com>": {"urgency": true, "secrecy": true, "quotes": ["don't loop anyone else in yet"]},
+  "<s05-newvendor@harbormedsupply.co>": {"pressure": true, "quotes": ["Payment is due within 5 days to secure the discounted price"]}
+}

@@ -1,0 +1,4 @@
+{
+  "_note": "MOCK writing-style check (Nemotron Super) keyed by Message-ID. Only called when the sender has history.",
+  "_default": {"mismatch": false, "reason": ""}
+}

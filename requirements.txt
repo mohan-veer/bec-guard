@@ -10,3 +10,4 @@ pypdfium2==5.14.0
 dnstwist==20250130
 pytest==9.1.1
 pytest-asyncio==1.4.1
+pillow==13.0.0

@@ -1,0 +1,7 @@
+{
+  "_note": "MOCK attachment reading (Nemotron Super VL) keyed by Message-ID.",
+  "_default": {},
+  "<s07-pdf@acmesupply.com>": {"bank_name": "Pacific Crest Bank", "routing_number": "999000222", "account_number": "000058127731",
+    "account_holder": "Acme Supply LLC", "method": "Wire transfer", "amount": "18400.00", "invoice_number": "ACM-10437",
+    "po": "PO-2026-0118", "remit_to": null}
+}

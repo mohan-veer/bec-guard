@@ -1,0 +1,87 @@
+{
+  "_note": "MOCK Tavily search responses keyed by lowercased query. Fictional sites. Unlisted queries return no results.",
+  "harbor medical supply official website": {
+    "results": [
+      {
+        "title": "Harbor Medical Supply | Medical & Dental Supplies Since 2004",
+        "url": "https://harbormedicalsupply.com/",
+        "content": "Harbor Medical Supply distributes gloves, masks and dental consumables across the Pacific Northwest.",
+        "score": 0.93
+      },
+      {
+        "title": "Harbor Medical Supply - Contact Us",
+        "url": "https://harbormedicalsupply.com/contact",
+        "content": "Call our billing team at (206) 555-0198. We will never ask you to change payment details by email.",
+        "score": 0.88
+      },
+      {
+        "title": "Harbor Medical Supply reviews",
+        "url": "https://reviews.example/harbor-medical-supply",
+        "content": "Reliable distributor based in Seattle.",
+        "score": 0.61
+      }
+    ]
+  },
+  "acme supply official website": {
+    "results": [
+      {
+        "title": "Acme Supply - Industrial & Office Supplies",
+        "url": "https://acmesupply.com/",
+        "content": "Acme Supply serves businesses in Oregon since 2009.",
+        "score": 0.95
+      },
+      {
+        "title": "Acme Supply - Contact",
+        "url": "https://acmesupply.com/contact",
+        "content": "Accounts receivable: (503) 555-0142.",
+        "score": 0.9
+      }
+    ]
+  },
+  "acme supply contact phone": {
+    "results": [
+      {
+        "title": "Acme Supply - Contact",
+        "url": "https://acmesupply.com/contact",
+        "content": "Accounts receivable: (503) 555-0142. Mon-Fri 8-5.",
+        "score": 0.92
+      }
+    ]
+  },
+  "harbor medical supply contact phone": {
+    "results": [
+      {
+        "title": "Harbor Medical Supply - Contact Us",
+        "url": "https://harbormedicalsupply.com/contact",
+        "content": "Call our billing team at (206) 555-0198. We will never ask you to change payment details by email.",
+        "score": 0.9
+      }
+    ]
+  },
+  "pacific paper co official website": {
+    "results": [
+      {
+        "title": "Pacific Paper Co - Office paper & packaging",
+        "url": "https://pacificpaperco.com/",
+        "content": "Family-owned paper supplier in Tigard, Oregon.",
+        "score": 0.94
+      },
+      {
+        "title": "Pacific Paper Co - Contact",
+        "url": "https://pacificpaperco.com/contact",
+        "content": "Order desk: (503) 555-0163.",
+        "score": 0.89
+      }
+    ]
+  },
+  "pacific paper co contact phone": {
+    "results": [
+      {
+        "title": "Pacific Paper Co - Contact",
+        "url": "https://pacificpaperco.com/contact",
+        "content": "Order desk: (503) 555-0163.",
+        "score": 0.89
+      }
+    ]
+  }
+}
