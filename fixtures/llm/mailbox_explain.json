@@ -1,0 +1,13 @@
+{
+  "_note": "MOCK one-line explanations (Nemotron Super) keyed by provider:source.",
+  "_default": {"items": []},
+  "outlook:fixture": {"items": [
+    {"id": "rule:AQAAAJ5dZqE=", "explanation": "Attackers use rules like this to hide payment emails, so the real vendor's replies never reach you while they redirect the money."},
+    {"id": "rule:AQAAAJ5dZqI=", "explanation": "A copy of every email goes to an outside account, which lets someone read your invoices and conversations and time a fake payment request."}
+  ]},
+  "gmail:fixture": {"items": [
+    {"id": "rule:ANe1Bmj2", "explanation": "This deletes payment emails before you see them, a common way to hide a vendor's warning that their bank details were changed."},
+    {"id": "rule:ANe1Bmj3", "explanation": "Your CEO's emails are copied to an outside Gmail account, which lets an attacker study how your CEO writes and then impersonate them."},
+    {"id": "fwd:records.backup.2026@gmail.com", "explanation": "An outside address is approved to receive your mail, which is how attackers keep reading a mailbox after a password reset."}
+  ]}
+}

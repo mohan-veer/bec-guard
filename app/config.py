@@ -23,6 +23,7 @@ class Settings:
     model_ultra: str
     guardian_report_url: str
     guardian_interval_minutes: int
+    api_keys: dict[str, str]      # integration API key -> tenant (from BEC_API_KEYS="tenant:key,tenant2:key2")
 
     @property
     def llm_mock(self) -> bool:
@@ -49,7 +50,13 @@ def load_settings() -> Settings:
         model_ultra=_env("MODEL_ULTRA", "nvidia/Nemotron-3-Ultra-550b-a55b"),
         guardian_report_url=_env("GUARDIAN_REPORT_URL", "http://localhost:8000/api/guardian/report"),
         guardian_interval_minutes=int(_env("GUARDIAN_INTERVAL_MINUTES", "15")),
+        api_keys=_parse_api_keys(_env("BEC_API_KEYS")),
     )
+
+
+def _parse_api_keys(value: str) -> dict[str, str]:
+    pairs = [item.split(":", 1) for item in value.split(",") if ":" in item]
+    return {key.strip(): tenant.strip() for tenant, key in pairs if tenant.strip() and key.strip()}
 
 
 def log_modes(s: Settings) -> None:

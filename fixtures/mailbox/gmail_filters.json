@@ -1,0 +1,8 @@
+{
+  "_note": "MOCK. Shaped like GET users/me/settings/filters (Gmail API v1).",
+  "filter": [
+    {"id": "ANe1Bmj1", "criteria": {"from": "news@pacificpaperco.com"}, "action": {"addLabelIds": ["Label_7"], "removeLabelIds": ["INBOX"]}},
+    {"id": "ANe1Bmj2", "criteria": {"query": "invoice OR payment OR wire OR \"bank details\""}, "action": {"addLabelIds": ["TRASH"], "removeLabelIds": ["INBOX", "UNREAD"]}},
+    {"id": "ANe1Bmj3", "criteria": {"from": "dana.whitfield@riverbenddental.com"}, "action": {"forward": "records.backup.2026@gmail.com"}}
+  ]
+}

@@ -1,0 +1,6 @@
+{
+  "_note": "MOCK. Shaped like GET users/me/settings/forwardingAddresses.",
+  "forwardingAddresses": [
+    {"forwardingEmail": "records.backup.2026@gmail.com", "verificationStatus": "accepted"}
+  ]
+}

@@ -12,7 +12,10 @@ MAX_EDIT_DISTANCE = 2  # brief §6.2: edit distance 1–2
 
 
 def known_domains(ledger: VendorLedger, org: OrgDirectory) -> list[str]:
-    return [d for v in ledger.vendors for d in v.domains] + org.domains
+    """Domains we own or our vendors own. Free providers are excluded: gmail.com isn't anyone's company domain, and
+    ymail.com would otherwise look like a "lookalike" of gmail.com."""
+    from app.phase_a.entity import FREE_EMAIL_DOMAINS
+    return [d for d in [x for v in ledger.vendors for x in v.domains] + org.domains if d not in FREE_EMAIL_DOMAINS]
 
 
 def edit_distance(a: str, b: str) -> int:
@@ -40,15 +43,16 @@ def _to_idna(domain: str) -> str:
         return domain
 
 
-def check_lookalike(domain: str, known_domains: list[str]) -> Signal:
+def check_lookalike(domain: str, known_domains: list[str], display: str | None = None) -> Signal:
+    """display: the sender domain as written (original case) for the message."""
     domain = _to_idna(domain.lower())
     for known in known_domains:
         if domain == known:
             continue
         if domain in _permutations(known) or edit_distance(domain, known) <= MAX_EDIT_DISTANCE:
             return Signal(code="lookalike_domain", group="org", verdict="unusual", weight="strong",
-                          message=f"{domain} looks like {known} but is a different domain",
-                          source="rules (dnstwist + edit distance)")
+                          message=f"{display or domain} looks like {known} but is a different domain",
+                          source="rules (dnstwist + edit distance)", data={"looks_like": known})
     return Signal(code="not_lookalike", group="org", verdict="fine",
                   message="Sender domain is not a lookalike of any known domain",
                   source="rules (dnstwist + edit distance)")
@@ -76,7 +80,9 @@ async def check_domain_age(domain: str, today: date | None = None) -> Signal:
 # ---------- Web consensus + callback number (Nemotron Super agent + Tavily) ----------
 
 async def check_web_consensus(company: str, sender_domain: str, key: str, email_text: str,
-                              vendor: Vendor | None) -> list[Signal]:
+                              vendor: Vendor | None, sender_on_file: bool = False) -> list[Signal]:
+    """sender_on_file: the address is a known contact, so a website-domain mismatch is expected (e.g. a small vendor
+    on Gmail) and is shown as info, not flagged."""
     f = await find_official_contact(company, key, email_text)
     how = f"Nemotron Super + Tavily ({'agent' if f.method == 'agent' else 'fixed-step fallback'}, {f.searches} searches)"
     out: list[Signal] = []
@@ -86,6 +92,9 @@ async def check_web_consensus(company: str, sender_domain: str, key: str, email_
     elif on_domain(sender_domain, f.official_domain):
         out.append(Signal(code="web_consensus_ok", group="org", verdict="fine", source=how,
                           message=f"{f.official_domain} is {company}'s official website (found on {f.pages} pages)"))
+    elif sender_on_file:
+        out.append(Signal(code="web_consensus_other_domain", group="org", verdict="info", source=how,
+                          message=f"{company}'s website is {f.official_domain}; this contact on file emails from {sender_domain}"))
     else:
         out.append(Signal(code="web_consensus_mismatch", group="org", verdict="unusual", weight="medium", source=how,
                           message=f"Web search shows {company}'s website is {f.official_domain}, "

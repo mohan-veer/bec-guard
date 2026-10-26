@@ -35,3 +35,8 @@ def test_rules(intent, signals, decision, rule):
 def test_first_matching_rule_wins():
     r = score(Intent.GIFT_CARDS, [sig("lookalike_domain", "strong"), sig("bank_change", "strong")])
     assert r.rule == "bank_change"
+
+
+def test_address_lookalike_rule():
+    r = score(Intent.PAYMENT_REQUEST, [sig("address_lookalike", "strong")])
+    assert (r.decision, r.rule) == (V, "address_lookalike")

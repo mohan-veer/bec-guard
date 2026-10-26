@@ -19,9 +19,11 @@ dist/
 htmlcov/
 .mypy_cache/
 .ruff_cache/
+*.log
 
 # Node
 node_modules/
+*.tsbuildinfo
 
 # Local notes
 PROJECT_NOTES.md
@@ -31,3 +33,4 @@ PROJECT_NOTES.md
 .vscode/
 .idea/
 *.swp
+frontend/dist/

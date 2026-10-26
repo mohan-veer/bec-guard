@@ -20,7 +20,8 @@ class Email(BaseModel):
     in_reply_to: str | None = None
     subject: str = ""
     from_name: str = ""
-    from_addr: str
+    from_addr: str                # lowercased, for matching
+    from_addr_raw: str = ""       # original case, for display (shows the capital I in acmesuppIy.com)
     reply_to: str | None = None
     to: list[str] = []
     date: datetime | None = None
@@ -34,6 +35,10 @@ class Email(BaseModel):
     @property
     def from_domain(self) -> str:
         return self.from_addr.rsplit("@", 1)[-1].lower()
+
+    @property
+    def from_domain_raw(self) -> str:
+        return (self.from_addr_raw or self.from_addr).rsplit("@", 1)[-1]
 
 
 class PaymentDetails(BaseModel):

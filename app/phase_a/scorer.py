@@ -23,6 +23,7 @@ def _any_strong(signals: list[Signal]) -> bool:
 RULES = [
     ("bank_change",            lambda i, s: "bank_change" in _fired(s) or i in (Intent.BANK_CHANGE, Intent.PAYROLL_CHANGE), V),
     ("lookalike_domain",       lambda i, s: "lookalike_domain" in _fired(s),                                 V),
+    ("address_lookalike",      lambda i, s: "address_lookalike" in _fired(s),                                V),
     ("known_name_new_address", lambda i, s: "known_name_new_address" in _fired(s) and i != Intent.NONE,      V),
     ("gift_cards",             lambda i, s: i == Intent.GIFT_CARDS or "gift_card_request" in _fired(s),      V),
     ("sensitive_data",         lambda i, s: "sensitive_data_request" in _fired(s),                           V),

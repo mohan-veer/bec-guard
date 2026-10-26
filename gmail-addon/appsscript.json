@@ -1,0 +1,27 @@
+{
+  "timeZone": "America/Los_Angeles",
+  "runtimeVersion": "V8",
+  "exceptionLogging": "STACKDRIVER",
+  "dependencies": {
+    "enabledAdvancedServices": [{ "userSymbol": "Gmail", "serviceId": "gmail", "version": "v1" }]
+  },
+  "oauthScopes": [
+    "https://www.googleapis.com/auth/gmail.addons.execute",
+    "https://www.googleapis.com/auth/gmail.addons.current.message.readonly",
+    "https://www.googleapis.com/auth/gmail.modify",
+    "https://www.googleapis.com/auth/gmail.settings.basic",
+    "https://www.googleapis.com/auth/script.external_request",
+    "https://www.googleapis.com/auth/script.scriptapp"
+  ],
+  "urlFetchWhitelist": ["https://*.trycloudflare.com/", "https://*.hf.space/"],
+  "addOns": {
+    "common": {
+      "name": "BEC Guard",
+      "logoUrl": "https://www.gstatic.com/images/icons/material/system/1x/verified_user_black_48dp.png",
+      "homepageTrigger": { "runFunction": "onHomepage", "enabled": true }
+    },
+    "gmail": {
+      "contextualTriggers": [{ "unconditional": {}, "onTriggerFunction": "onGmailMessageOpen" }]
+    }
+  }
+}

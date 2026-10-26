@@ -1,0 +1,117 @@
+{
+  "_note": "LIVE DEMO PROFILE (tenant 'riverbend'). Fictional vendor whose contact is our own test mailbox test.vendor26@yahoo.com. Routing numbers start with 999 (invalid); phones 555-01xx.",
+  "vendors": [
+    {
+      "id": "acme",
+      "name": "Acme Supply",
+      "domains": [],
+      "official_website": "",
+      "official_phone": "(503) 555-0142",
+      "contacts": [
+        {
+          "name": "Sam Ortiz",
+          "email": "test.vendor26@yahoo.com",
+          "role": "Accounts Receivable"
+        }
+      ],
+      "bank_account": {
+        "bank_name": "First Cascade Bank",
+        "routing_number": "999000111",
+        "account_last4": "4821",
+        "account_holder": "Acme Supply LLC"
+      },
+      "payment_method": "ACH",
+      "usual_amount": {
+        "min": 12000,
+        "max": 25000
+      },
+      "invoice_pattern": "^ACM-\\d{5}$",
+      "remit_to": "1200 Industrial Way, Portland, OR 97210",
+      "past_invoices": [
+        {
+          "number": "ACM-10431",
+          "date": "2026-04-03",
+          "amount": 14250.0,
+          "po": "PO-2026-0071",
+          "bank_last4": "4821",
+          "method": "ACH",
+          "status": "paid"
+        },
+        {
+          "number": "ACM-10432",
+          "date": "2026-05-01",
+          "amount": 17900.0,
+          "po": "PO-2026-0080",
+          "bank_last4": "4821",
+          "method": "ACH",
+          "status": "paid"
+        },
+        {
+          "number": "ACM-10433",
+          "date": "2026-06-02",
+          "amount": 12600.0,
+          "po": "PO-2026-0089",
+          "bank_last4": "4821",
+          "method": "ACH",
+          "status": "paid"
+        },
+        {
+          "number": "ACM-10434",
+          "date": "2026-07-01",
+          "amount": 21300.0,
+          "po": "PO-2026-0097",
+          "bank_last4": "4821",
+          "method": "ACH",
+          "status": "paid"
+        },
+        {
+          "number": "ACM-10435",
+          "date": "2026-08-04",
+          "amount": 16450.0,
+          "po": "PO-2026-0104",
+          "bank_last4": "4821",
+          "method": "ACH",
+          "status": "paid"
+        },
+        {
+          "number": "ACM-10436",
+          "date": "2026-09-01",
+          "amount": 19800.0,
+          "po": "PO-2026-0111",
+          "bank_last4": "4821",
+          "method": "ACH",
+          "status": "paid"
+        },
+        {
+          "number": "ACM-10437",
+          "date": "2026-10-01",
+          "amount": 18400.0,
+          "po": "PO-2026-0118",
+          "bank_last4": "4821",
+          "method": "ACH",
+          "status": "open"
+        }
+      ],
+      "past_emails": [
+        {
+          "from_addr": "test.vendor26@yahoo.com",
+          "date": "2026-08-04",
+          "subject": "Invoice ACM-10435",
+          "body": "Hi Jordan,\n\nAttached is invoice ACM-10435 for PO-2026-0104, due in 30 days. Payment by ACH to the account on file as usual.\n\nThanks,\nSam Ortiz\nAccounts Receivable, Acme Supply"
+        },
+        {
+          "from_addr": "test.vendor26@yahoo.com",
+          "date": "2026-09-01",
+          "subject": "Invoice ACM-10436",
+          "body": "Hi Jordan,\n\nPlease find invoice ACM-10436 attached for PO-2026-0111. Let me know if you need anything else.\n\nThanks,\nSam Ortiz\nAccounts Receivable, Acme Supply"
+        },
+        {
+          "from_addr": "test.vendor26@yahoo.com",
+          "date": "2026-10-01",
+          "subject": "Invoice ACM-10437",
+          "body": "Hi Jordan,\n\nAttached is invoice ACM-10437 for PO-2026-0118, net 30. ACH to the usual account is fine.\n\nThanks,\nSam Ortiz\nAccounts Receivable, Acme Supply"
+        }
+      ]
+    }
+  ]
+}

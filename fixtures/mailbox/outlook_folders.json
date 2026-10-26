@@ -1,0 +1,7 @@
+{
+  "_note": "MOCK. Folder IDs -> names, as GET /me/mailFolders/{id}?$select=displayName would return.",
+  "value": [
+    {"id": "AAMkNewsletters", "displayName": "Newsletters"},
+    {"id": "AAMkRssFeeds", "displayName": "RSS Feeds"}
+  ]
+}

@@ -11,6 +11,7 @@ from pydantic import BaseModel
 
 from app.clients.llm import complete_json
 from app.config import load_settings
+from app.phase_a.entity import FREE_EMAIL_DOMAINS
 from app.phase_a.models import Attachment, Email, PaymentDetails, Signal, Vendor, VendorLedger
 
 _BANK_RE = re.compile(r"^\s*Bank(?: name)?:\s*(.+?)\s*$", re.IGNORECASE | re.MULTILINE)
@@ -57,9 +58,13 @@ def extract_payment_details(text: str) -> PaymentDetails:
 
 
 def find_vendor(e: Email, ledger: VendorLedger) -> Vendor | None:
-    """The vendor this email is about: by sender domain, else by a vendor or contact name in the display name."""
+    """The vendor this email is about: by exact contact address, then by company domain (never a free provider's
+    domain: two strangers on yahoo.com aren't the same vendor), else by a vendor or contact name."""
     for v in ledger.vendors:
-        if e.from_domain in v.domains:
+        if any(c.email.lower() == e.from_addr for c in v.contacts):
+            return v
+    for v in ledger.vendors:
+        if e.from_domain in v.domains and e.from_domain not in FREE_EMAIL_DOMAINS:
             return v
     name = e.from_name.strip().lower()
     for v in ledger.vendors:

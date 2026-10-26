@@ -33,3 +33,11 @@ def test_edit_distance():
     assert edit_distance("abc", "abd") == 1
     assert edit_distance("abc", "ab") == 1
     assert edit_distance("kitten", "sitting") == 3
+
+
+def test_free_email_domains_are_never_lookalike_targets():
+    from app.phase_a.org import known_domains
+    from app.phase_a.models import OrgDirectory, VendorLedger
+    doms = known_domains(VendorLedger(vendors=[]), OrgDirectory(org_name="o", domains=["gmail.com", "riverbend.com"], people=[]))
+    assert doms == ["riverbend.com"]
+    assert check_lookalike("ymail.com", doms).code == "not_lookalike"

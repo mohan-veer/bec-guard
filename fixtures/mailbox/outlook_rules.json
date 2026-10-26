@@ -1,0 +1,21 @@
+{
+  "_note": "MOCK. Shaped like GET /me/mailFolders/inbox/messageRules (Microsoft Graph v1.0). Fictional mailbox of jordan.ellis@riverbenddental.com.",
+  "@odata.context": "https://graph.microsoft.com/v1.0/$metadata#Me/mailFolders('inbox')/messageRules",
+  "value": [
+    {"id": "AQAAAJ5dZp8=", "displayName": "Newsletters", "sequence": 1, "isEnabled": true, "hasError": false, "isReadOnly": false,
+     "conditions": {"senderContains": ["newsletter", "digest"]},
+     "actions": {"moveToFolder": "AAMkNewsletters", "stopProcessingRules": true}},
+    {"id": "AQAAAJ5dZqA=", "displayName": "From Priya", "sequence": 2, "isEnabled": true, "hasError": false, "isReadOnly": false,
+     "conditions": {"fromAddresses": [{"emailAddress": {"name": "Priya Raman", "address": "priya.raman@riverbenddental.com"}}]},
+     "actions": {"forwardTo": [{"emailAddress": {"name": "Marcus Lee", "address": "marcus.lee@riverbenddental.com"}}]}},
+    {"id": "AQAAAJ5dZqE=", "displayName": ".", "sequence": 3, "isEnabled": true, "hasError": false, "isReadOnly": false,
+     "conditions": {"bodyOrSubjectContains": ["invoice", "payment", "wire", "bank details"]},
+     "actions": {"moveToFolder": "AAMkRssFeeds", "markAsRead": true, "stopProcessingRules": true}},
+    {"id": "AQAAAJ5dZqI=", "displayName": "Sync", "sequence": 4, "isEnabled": true, "hasError": false, "isReadOnly": false,
+     "conditions": {},
+     "actions": {"forwardTo": [{"emailAddress": {"name": "Jordan", "address": "jordan.ellis.files@protonmail.com"}}]}},
+    {"id": "AQAAAJ5dZqM=", "displayName": "Old vendor cleanup", "sequence": 5, "isEnabled": false, "hasError": false, "isReadOnly": false,
+     "conditions": {"senderContains": ["oldvendor.com"]},
+     "actions": {"delete": true}}
+  ]
+}

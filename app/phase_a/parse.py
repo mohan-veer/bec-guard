@@ -16,12 +16,12 @@ def parse_auth_results(header: str) -> dict[str, str | None]:
 
 
 def _first_address(msg, name: str) -> tuple[str, str]:
-    """Returns (display_name, lowercased address) of the first address in a header, or ("", "")."""
+    """Returns (display_name, address as written) of the first address in a header, or ("", "")."""
     header = msg[name]
     if not header or not header.addresses:
         return "", ""
     a = header.addresses[0]
-    return a.display_name, a.addr_spec.lower()
+    return a.display_name, a.addr_spec
 
 
 def _body_text(msg) -> str:
@@ -36,7 +36,7 @@ def _body_text(msg) -> str:
 
 def parse_eml(raw: bytes) -> Email:
     msg = email.message_from_bytes(raw, policy=email.policy.default)
-    from_name, from_addr = _first_address(msg, "From")
+    from_name, from_raw = _first_address(msg, "From")
     _, reply_to = _first_address(msg, "Reply-To")
     to = [a.addr_spec.lower() for a in msg["To"].addresses] if msg["To"] else []
     date = msg["Date"].datetime if msg["Date"] else None
@@ -51,8 +51,9 @@ def parse_eml(raw: bytes) -> Email:
         in_reply_to=str(msg["In-Reply-To"]).strip() if msg["In-Reply-To"] else None,
         subject=str(msg.get("Subject", "")),
         from_name=from_name,
-        from_addr=from_addr,
-        reply_to=reply_to or None,
+        from_addr=from_raw.lower(),
+        from_addr_raw=from_raw,
+        reply_to=reply_to.lower() or None,
         to=to,
         date=date,
         body_text=_body_text(msg),
