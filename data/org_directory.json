@@ -1,0 +1,11 @@
+{
+  "_note": "MOCK DATA. Fictional organization and people for the BEC Guard demo.",
+  "org_name": "Riverbend Dental Partners",
+  "domains": ["riverbenddental.com"],
+  "people": [
+    {"name": "Dana Whitfield", "role": "CEO", "email": "dana.whitfield@riverbenddental.com", "phone": "(503) 555-0110"},
+    {"name": "Priya Raman", "role": "CFO", "email": "priya.raman@riverbenddental.com", "phone": "(503) 555-0111"},
+    {"name": "Marcus Lee", "role": "HR Lead", "email": "marcus.lee@riverbenddental.com", "phone": "(503) 555-0112"},
+    {"name": "Jordan Ellis", "role": "AP Clerk", "email": "jordan.ellis@riverbenddental.com", "phone": "(503) 555-0113"}
+  ]
+}

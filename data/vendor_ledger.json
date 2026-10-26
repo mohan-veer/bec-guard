@@ -1,0 +1,136 @@
+{
+  "_note": "MOCK DATA. Fictional vendors. Routing numbers start with 999 so they are not valid real routing numbers. Phone numbers use the fictional 555-01xx range.",
+  "vendors": [
+    {
+      "id": "acme",
+      "name": "Acme Supply",
+      "domains": ["acmesupply.com"],
+      "official_website": "https://acmesupply.com",
+      "official_phone": "(503) 555-0142",
+      "contacts": [
+        {"name": "Sam Ortiz", "email": "ar@acmesupply.com", "role": "Accounts Receivable"},
+        {"name": "Lena Brooks", "email": "lena.brooks@acmesupply.com", "role": "Account Manager"}
+      ],
+      "bank_account": {"bank_name": "First Cascade Bank", "routing_number": "999000111", "account_last4": "4821", "account_holder": "Acme Supply LLC"},
+      "payment_method": "ACH",
+      "usual_amount": {"min": 12000, "max": 25000},
+      "invoice_pattern": "^ACM-\\d{5}$",
+      "remit_to": "1200 Industrial Way, Portland, OR 97210",
+      "past_invoices": [
+        {"number": "ACM-10431", "date": "2026-04-03", "amount": 14250.00, "po": "PO-2026-0071", "bank_last4": "4821", "method": "ACH", "status": "paid"},
+        {"number": "ACM-10432", "date": "2026-05-01", "amount": 17900.00, "po": "PO-2026-0080", "bank_last4": "4821", "method": "ACH", "status": "paid"},
+        {"number": "ACM-10433", "date": "2026-06-02", "amount": 12600.00, "po": "PO-2026-0089", "bank_last4": "4821", "method": "ACH", "status": "paid"},
+        {"number": "ACM-10434", "date": "2026-07-01", "amount": 21300.00, "po": "PO-2026-0097", "bank_last4": "4821", "method": "ACH", "status": "paid"},
+        {"number": "ACM-10435", "date": "2026-08-04", "amount": 16450.00, "po": "PO-2026-0104", "bank_last4": "4821", "method": "ACH", "status": "paid"},
+        {"number": "ACM-10436", "date": "2026-09-01", "amount": 19800.00, "po": "PO-2026-0111", "bank_last4": "4821", "method": "ACH", "status": "paid"},
+        {"number": "ACM-10437", "date": "2026-10-01", "amount": 18400.00, "po": "PO-2026-0118", "bank_last4": "4821", "method": "ACH", "status": "open"}
+      ],
+      "past_emails": [
+        {"from_addr": "ar@acmesupply.com", "date": "2026-08-04", "subject": "Invoice ACM-10435", "body": "Hi Jordan,\n\nAttached is invoice ACM-10435 for PO-2026-0104, due in 30 days. Payment by ACH to the account on file as usual.\n\nThanks,\nSam Ortiz\nAccounts Receivable, Acme Supply"},
+        {"from_addr": "ar@acmesupply.com", "date": "2026-09-01", "subject": "Invoice ACM-10436", "body": "Hi Jordan,\n\nPlease find invoice ACM-10436 attached for PO-2026-0111. Let me know if you need anything else.\n\nThanks,\nSam Ortiz\nAccounts Receivable, Acme Supply"},
+        {"from_addr": "ar@acmesupply.com", "date": "2026-10-01", "subject": "Invoice ACM-10437", "body": "Hi Jordan,\n\nAttached is invoice ACM-10437 for PO-2026-0118, net 30. ACH to the usual account is fine.\n\nThanks,\nSam Ortiz\nAccounts Receivable, Acme Supply"}
+      ]
+    },
+    {
+      "id": "checking",
+      "name": "Checking Solutions",
+      "domains": ["checkingsolutions.com"],
+      "official_website": "https://checkingsolutions.com",
+      "official_phone": "(971) 555-0187",
+      "contacts": [
+        {"name": "Tom Reyes", "email": "billing@checkingsolutions.com", "role": "Billing"}
+      ],
+      "bank_account": {"bank_name": "Willamette Valley Bank", "routing_number": "999000333", "account_last4": "2290", "account_holder": "Checking Solutions Inc."},
+      "payment_method": "ACH",
+      "usual_amount": {"min": 450, "max": 900},
+      "invoice_pattern": "^CS-\\d{4}-\\d{2}$",
+      "remit_to": "88 Commerce St, Salem, OR 97301",
+      "past_invoices": [
+        {"number": "CS-2026-07", "date": "2026-07-05", "amount": 620.00, "po": null, "bank_last4": "2290", "method": "ACH", "status": "paid"},
+        {"number": "CS-2026-08", "date": "2026-08-05", "amount": 620.00, "po": null, "bank_last4": "2290", "method": "ACH", "status": "paid"},
+        {"number": "CS-2026-09", "date": "2026-09-05", "amount": 655.00, "po": null, "bank_last4": "2290", "method": "ACH", "status": "paid"}
+      ],
+      "past_emails": [
+        {"from_addr": "billing@checkingsolutions.com", "date": "2026-07-05", "subject": "July statement CS-2026-07", "body": "Hello,\n\nYour July statement is attached. Autopay by ACH will run on the 15th.\n\nRegards,\nTom Reyes, Billing"},
+        {"from_addr": "billing@checkingsolutions.com", "date": "2026-08-05", "subject": "August statement CS-2026-08", "body": "Hello,\n\nYour August statement is attached. Autopay by ACH will run on the 15th.\n\nRegards,\nTom Reyes, Billing"},
+        {"from_addr": "billing@checkingsolutions.com", "date": "2026-09-05", "subject": "September statement CS-2026-09", "body": "Hello,\n\nYour September statement is attached. Autopay by ACH will run on the 15th.\n\nRegards,\nTom Reyes, Billing"}
+      ]
+    },
+    {
+      "id": "pacificpaper",
+      "name": "Pacific Paper Co",
+      "domains": ["pacificpaperco.com"],
+      "official_website": "https://pacificpaperco.com",
+      "official_phone": "(503) 555-0163",
+      "contacts": [
+        {"name": "Mei Chen", "email": "orders@pacificpaperco.com", "role": "Order Desk"}
+      ],
+      "bank_account": {"bank_name": "First Cascade Bank", "routing_number": "999000111", "account_last4": "5567", "account_holder": "Pacific Paper Company"},
+      "payment_method": "ACH",
+      "usual_amount": {"min": 800, "max": 2000},
+      "invoice_pattern": "^PPC-\\d{4}-\\d{4}$",
+      "remit_to": "410 Harbor Rd, Tigard, OR 97223",
+      "past_invoices": [
+        {"number": "PPC-2026-0408", "date": "2026-06-10", "amount": 1180.00, "po": "PO-2026-0090", "bank_last4": "5567", "method": "ACH", "status": "paid"},
+        {"number": "PPC-2026-0409", "date": "2026-07-09", "amount": 960.00, "po": "PO-2026-0098", "bank_last4": "5567", "method": "ACH", "status": "paid"},
+        {"number": "PPC-2026-0410", "date": "2026-08-11", "amount": 1415.00, "po": "PO-2026-0105", "bank_last4": "5567", "method": "ACH", "status": "paid"},
+        {"number": "PPC-2026-0411", "date": "2026-09-10", "amount": 1302.50, "po": "PO-2026-0112", "bank_last4": "5567", "method": "ACH", "status": "paid"}
+      ],
+      "past_emails": [
+        {"from_addr": "orders@pacificpaperco.com", "date": "2026-08-11", "subject": "Invoice PPC-2026-0410", "body": "Hi Jordan,\n\nInvoice PPC-2026-0410 for PO-2026-0105 is attached. Thank you for your order!\n\nBest,\nMei Chen\nPacific Paper Co"},
+        {"from_addr": "orders@pacificpaperco.com", "date": "2026-09-10", "subject": "Invoice PPC-2026-0411", "body": "Hi Jordan,\n\nInvoice PPC-2026-0411 for PO-2026-0112 is attached. Thank you for your order!\n\nBest,\nMei Chen\nPacific Paper Co"},
+        {"from_addr": "orders@pacificpaperco.com", "date": "2026-07-09", "subject": "Invoice PPC-2026-0409", "body": "Hi Jordan,\n\nInvoice PPC-2026-0409 for PO-2026-0098 is attached. Thanks again!\n\nBest,\nMei Chen\nPacific Paper Co"}
+      ]
+    },
+    {
+      "id": "brightclean",
+      "name": "BrightClean Janitorial",
+      "domains": ["brightcleanjanitorial.com"],
+      "official_website": "https://brightcleanjanitorial.com",
+      "official_phone": "(503) 555-0129",
+      "contacts": [
+        {"name": "Alicia Grant", "email": "office@brightcleanjanitorial.com", "role": "Office Manager"}
+      ],
+      "bank_account": {"bank_name": "Columbia Community Bank", "routing_number": "999000444", "account_last4": "3408", "account_holder": "BrightClean Janitorial LLC"},
+      "payment_method": "ACH",
+      "usual_amount": {"min": 2200, "max": 2600},
+      "invoice_pattern": "^BC-\\d{5}$",
+      "remit_to": "77 Oak Ave, Beaverton, OR 97005",
+      "past_invoices": [
+        {"number": "BC-20871", "date": "2026-07-31", "amount": 2400.00, "po": null, "bank_last4": "3408", "method": "ACH", "status": "paid"},
+        {"number": "BC-20934", "date": "2026-08-31", "amount": 2400.00, "po": null, "bank_last4": "3408", "method": "ACH", "status": "paid"},
+        {"number": "BC-20996", "date": "2026-09-30", "amount": 2475.00, "po": null, "bank_last4": "3408", "method": "ACH", "status": "paid"}
+      ],
+      "past_emails": [
+        {"from_addr": "office@brightcleanjanitorial.com", "date": "2026-07-31", "subject": "July cleaning invoice", "body": "Hi there,\n\nHere is the July invoice BC-20871. Thanks for your business.\n\nAlicia\nBrightClean Janitorial"},
+        {"from_addr": "office@brightcleanjanitorial.com", "date": "2026-08-31", "subject": "August cleaning invoice", "body": "Hi there,\n\nHere is the August invoice BC-20934. Thanks for your business.\n\nAlicia\nBrightClean Janitorial"},
+        {"from_addr": "office@brightcleanjanitorial.com", "date": "2026-09-30", "subject": "September cleaning invoice", "body": "Hi there,\n\nHere is the September invoice BC-20996, includes one extra window cleaning. Thanks!\n\nAlicia\nBrightClean Janitorial"}
+      ]
+    },
+    {
+      "id": "summitit",
+      "name": "Summit IT Services",
+      "domains": ["summititservices.com"],
+      "official_website": "https://summititservices.com",
+      "official_phone": "(360) 555-0171",
+      "contacts": [
+        {"name": "Raj Patel", "email": "accounts@summititservices.com", "role": "Accounts"}
+      ],
+      "bank_account": {"bank_name": "Pacific Northwest Credit Union", "routing_number": "999000555", "account_last4": "9012", "account_holder": "Summit IT Services Inc."},
+      "payment_method": "ACH",
+      "usual_amount": {"min": 3000, "max": 6000},
+      "invoice_pattern": "^SIT-\\d{4}$",
+      "remit_to": "15 Main St Suite 300, Vancouver, WA 98660",
+      "past_invoices": [
+        {"number": "SIT-1182", "date": "2026-07-01", "amount": 3500.00, "po": "PO-2026-0095", "bank_last4": "9012", "method": "ACH", "status": "paid"},
+        {"number": "SIT-1207", "date": "2026-08-01", "amount": 3500.00, "po": "PO-2026-0101", "bank_last4": "9012", "method": "ACH", "status": "paid"},
+        {"number": "SIT-1233", "date": "2026-09-01", "amount": 5240.00, "po": "PO-2026-0109", "bank_last4": "9012", "method": "ACH", "status": "paid"}
+      ],
+      "past_emails": [
+        {"from_addr": "accounts@summititservices.com", "date": "2026-07-01", "subject": "Managed services invoice SIT-1182", "body": "Hello Jordan,\n\nPlease find attached invoice SIT-1182 for July managed services.\n\nKind regards,\nRaj Patel\nSummit IT Services"},
+        {"from_addr": "accounts@summititservices.com", "date": "2026-08-01", "subject": "Managed services invoice SIT-1207", "body": "Hello Jordan,\n\nPlease find attached invoice SIT-1207 for August managed services.\n\nKind regards,\nRaj Patel\nSummit IT Services"},
+        {"from_addr": "accounts@summititservices.com", "date": "2026-09-01", "subject": "Managed services invoice SIT-1233", "body": "Hello Jordan,\n\nPlease find attached invoice SIT-1233 for August managed services plus the new firewall install.\n\nKind regards,\nRaj Patel\nSummit IT Services"}
+      ]
+    }
+  ]
+}

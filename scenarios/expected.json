@@ -1,0 +1,19 @@
+{
+  "_note": "Expected outcome per demo scenario. key_signals must all fire (scenario passes only for the right reason).",
+  "scenarios": [
+    {"file": "01_lookalike_vendor.eml", "title": "Lookalike vendor domain",
+     "intent": "payment_request", "decisions": ["VERIFY_BEFORE_PAYING"], "key_signals": ["lookalike_domain"]},
+    {"file": "02_hacked_vendor_thread.eml", "title": "Hacked real vendor thread",
+     "intent": "bank_change", "decisions": ["VERIFY_BEFORE_PAYING"], "key_signals": ["bank_change"]},
+    {"file": "03_fake_ceo_gift_cards.eml", "title": "Fake CEO gift cards",
+     "intent": "gift_cards", "decisions": ["VERIFY_BEFORE_PAYING"], "key_signals": ["gift_card_request", "known_name_new_address"]},
+    {"file": "04_w2_lookalike_internal.eml", "title": "W-2 request from lookalike internal domain",
+     "intent": "data_request", "decisions": ["VERIFY_BEFORE_PAYING"], "key_signals": ["lookalike_domain", "sensitive_data_request"]},
+    {"file": "05_fake_supplier_copied_name.eml", "title": "Fake supplier with a copied company name",
+     "intent": "payment_request", "decisions": ["LOOKS_UNUSUAL", "VERIFY_BEFORE_PAYING"], "key_signals": ["web_consensus_mismatch", "first_contact"]},
+    {"file": "06_legit_invoice_control.eml", "title": "Legitimate invoice (control)",
+     "intent": "payment_request", "decisions": ["NO_ISSUES_FOUND"], "key_signals": []},
+    {"file": "07_pdf_bank_details.eml", "title": "Bank details inside a PDF attachment",
+     "intent": "bank_change", "decisions": ["VERIFY_BEFORE_PAYING"], "key_signals": ["bank_change"]}
+  ]
+}
