@@ -36,6 +36,19 @@ class Email(BaseModel):
         return self.from_addr.rsplit("@", 1)[-1].lower()
 
 
+class PaymentDetails(BaseModel):
+    """Payment fields found in the body text (regex) or in an attachment (VL model)."""
+    bank_name: str | None = None
+    routing_number: str | None = None
+    account_last4: str | None = None
+    account_holder: str | None = None
+    method: Literal["ACH", "wire", "check"] | None = None
+    amount: Decimal | None = None
+    invoice_number: str | None = None
+    po: str | None = None
+    remit_to: str | None = None
+
+
 # ---------- Signals and decisions ----------
 
 class Intent(str, Enum):
@@ -60,6 +73,19 @@ class Signal(BaseModel):
     weight: Literal["strong", "medium", "low", "none"] = "none"
     message: str                  # one calm line for the result card
     source: str                   # which model or tool produced it, e.g. "rules", "Nemotron Super", "Tavily"
+
+
+class ScoreResult(BaseModel):
+    decision: Decision
+    rule: str                     # name of the scorer rule that decided
+
+
+class AnalysisResult(BaseModel):
+    message_id: str
+    intent: Intent
+    decision: Decision | None     # None when Gate 0 finds no money or data request
+    rule: str | None
+    signals: list[Signal]
 
 
 # ---------- Seeded data (data/*.json) ----------

@@ -5,6 +5,8 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 
 from app.config import load_settings, log_modes
+from app.phase_a.data import load_ledger, load_org
+from app.phase_a.org import check_lookalike, known_domains
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(name)s: %(message)s")
 
@@ -12,6 +14,7 @@ logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(name
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     log_modes(load_settings())
+    check_lookalike("warmup.invalid", known_domains(load_ledger(), load_org()))  # builds dnstwist cache (~1.4 s)
     yield
 
 
