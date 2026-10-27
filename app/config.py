@@ -24,6 +24,10 @@ class Settings:
     guardian_report_url: str
     guardian_interval_minutes: int
     api_keys: dict[str, str]      # integration API key -> tenant (from BEC_API_KEYS="tenant:key,tenant2:key2")
+    rate_public_per_minute: int   # public check endpoints, per visitor IP (arbitrary defaults)
+    rate_public_per_day: int
+    rate_ingest_per_minute: int   # integration API: new emails per tenant
+    daily_analysis_budget: int    # hard ceiling on analyses per day, all callers together
 
     @property
     def llm_mock(self) -> bool:
@@ -51,6 +55,10 @@ def load_settings() -> Settings:
         guardian_report_url=_env("GUARDIAN_REPORT_URL", "http://localhost:8000/api/guardian/report"),
         guardian_interval_minutes=int(_env("GUARDIAN_INTERVAL_MINUTES", "15")),
         api_keys=_parse_api_keys(_env("BEC_API_KEYS")),
+        rate_public_per_minute=int(_env("RATE_LIMIT_PUBLIC_PER_MINUTE", "10")),
+        rate_public_per_day=int(_env("RATE_LIMIT_PUBLIC_PER_DAY", "100")),
+        rate_ingest_per_minute=int(_env("RATE_LIMIT_INGEST_PER_MINUTE", "60")),
+        daily_analysis_budget=int(_env("DAILY_ANALYSIS_BUDGET", "1000")),
     )
 
 

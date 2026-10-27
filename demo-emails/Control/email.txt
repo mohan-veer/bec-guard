@@ -1,0 +1,14 @@
+From: test.vendor26@yahoo.com
+To: testorganization26@gmail.com
+Subject: Invoice ACM-10438
+Attach: ACM-10438.pdf
+Expected: No label. Sidebar: "No issues found" + what checked out.
+
+----- body (copy from here) -----
+Hi Jordan,
+
+Attached is invoice ACM-10438 for PO-2026-0125: $17,200.00, net 30. ACH to the usual account is fine.
+
+Thanks,
+Sam Ortiz
+Accounts Receivable, Acme Supply

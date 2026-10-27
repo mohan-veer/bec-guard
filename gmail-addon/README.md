@@ -29,6 +29,12 @@ the add-on is installed as a test deployment.
 7. Click **Turn on** (automatic checking). If Google refuses because add-on timers are limited, open the script
    editor, choose the function `installScanner` and click **Run** once.
 
+## Demo mailbox history (optional, for the demo account)
+
+Script editor → choose `seedDemoHistory` → **Run**. It imports 22 backdated emails (June–October 2026, with invoice
+PDFs) from BEC Guard into this mailbox; re-running is safe. `removeDemoHistory` moves them all to Trash. The dataset
+and the live test emails are described in [docs/DEMO_SCENARIOS.md](../docs/DEMO_SCENARIOS.md).
+
 ## Develop
 - Pure logic is in `Logic.js` and tested with Node's built-in runner: `node --test gmail-addon/tests/logic.test.js`
 - Everything that touches Gmail, cards or triggers is in `Code.js` (only runs inside Apps Script).

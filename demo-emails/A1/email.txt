@@ -1,0 +1,19 @@
+From: testvendor.26@outlook.com (display name: Sam Ortiz)
+To: testorganization26@gmail.com
+Subject: Invoice ACM-10437 - urgent
+Attach: ACM-10437.pdf
+Expected: Red label (may land in Spam). Address lookalike of test.vendor26@yahoo.com, known name new address, first contact, new account ending 9055, ACH -> wire.
+
+----- body (copy from here) -----
+Hi Jordan,
+
+Our bank flagged the ACH for ACM-10437. Please send the $18,400.00 today by wire to our new account:
+
+Bank: Lakeshore Commerce Bank
+Routing: 999000666
+Account: 000044019055
+
+Corrected invoice attached.
+
+Thanks,
+Sam

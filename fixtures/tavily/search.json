@@ -83,5 +83,31 @@
         "score": 0.89
       }
     ]
+  },
+  "henry schein official website": {
+    "results": [
+      {
+        "title": "Henry Schein - Dental Supplies (MOCK)",
+        "url": "https://www.henryschein.com/",
+        "content": "MOCK fixture page.",
+        "score": 0.9
+      },
+      {
+        "title": "Henry Schein - Contact (MOCK)",
+        "url": "https://www.henryschein.com/contact",
+        "content": "Customer service: (800) 555-0123 (MOCK fixture number).",
+        "score": 0.8
+      }
+    ]
+  },
+  "henry schein customer service phone": {
+    "results": [
+      {
+        "title": "Henry Schein - Contact (MOCK)",
+        "url": "https://www.henryschein.com/contact",
+        "content": "Customer service: (800) 555-0123 (MOCK fixture number).",
+        "score": 0.8
+      }
+    ]
   }
 }

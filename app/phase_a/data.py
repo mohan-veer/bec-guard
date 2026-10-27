@@ -27,6 +27,10 @@ def profile_for_tenant(tenant: str) -> str:
     return tenant if safe and (TENANTS_DIR / tenant).is_dir() else SAMPLE
 
 
+def current_profile() -> str:
+    return _profile.get()
+
+
 def set_profile(profile: str) -> None:
     """For a new task's context (see jobs.submit)."""
     _profile.set(profile)

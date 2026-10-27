@@ -59,16 +59,18 @@ def test_missing_or_wrong_key_is_401(client, headers):
 # ---------- ingest -> queued -> done ----------
 
 def test_ingest_returns_202_then_analysis_completes(client):
-    r = client.post("/api/v1/messages", json=body("m-bank", "02_hacked_vendor_thread.eml"), headers=A)
+    # Sample-inbox email -> sample-profile tenant (in the live profile "Sam Ortiz" is on file at another address).
+    r = client.post("/api/v1/messages", json=body("m-bank", "02_hacked_vendor_thread.eml"), headers=B)
     assert r.status_code == 202 and r.json()["status"] in ("queued", "processing", "done")
-    done = wait_done(client, "m-bank")
+    done = wait_done(client, "m-bank", headers=B)
     assert done["status"] == "done" and done["label"] == "verify"
-    assert done["card"]["action"].startswith("Bank details changed.")
+    assert done["card"]["action"].startswith("Before paying, confirm the new bank details with")
 
 
 def test_clean_email_gets_no_label(client):
-    client.post("/api/v1/messages", json=body("m-ok", "06_legit_invoice_control.eml"), headers=A)
-    assert wait_done(client, "m-ok")["label"] == "none"
+    # Sample-inbox email -> tenant "other", which has no data folder and so uses the sample records it was written for.
+    client.post("/api/v1/messages", json=body("m-ok", "06_legit_invoice_control.eml"), headers=B)
+    assert wait_done(client, "m-ok", headers=B)["label"] == "none"
 
 
 def test_duplicate_submit_is_not_reanalyzed(client, monkeypatch):
@@ -189,7 +191,7 @@ def test_live_tenant_uses_its_own_vendor_records(client):
     done = wait_done(client, "live-1", mailbox="testorganization26@gmail.com")
     assert done["label"] == "verify"
     card = done["card"]
-    assert card["action"].startswith("Bank details changed.")
+    assert card["action"].startswith("Before paying, confirm the new bank details with")
     assert card["callback"]["phone"] == "(503) 555-0142" and card["callback"]["from"] == "your vendor records"
     assert not any("free email" in line for line in card["looks_unusual"])  # vendor on Yahoo is on file
 
@@ -202,3 +204,17 @@ def test_live_tenant_catches_vendor_username_on_another_provider(client):
     assert done["label"] == "verify"
     assert "test.vendor26@yahoo.com" in done["card"]["action"] or any(
         "test.vendor26@yahoo.com" in line for line in done["card"]["looks_unusual"])
+
+
+# ---------- demo history (seeded by the add-on's seedDemoHistory) ----------
+
+def test_demo_history_for_live_tenant(client):
+    r = client.get("/api/v1/demo/history", headers=A)
+    assert r.status_code == 200
+    msgs = r.json()["messages"]
+    assert len(msgs) >= 20 and all({"key", "labels", "raw"} <= set(m) for m in msgs)
+
+
+def test_demo_history_not_available_for_other_tenants_or_without_key(client):
+    assert client.get("/api/v1/demo/history", headers=B).status_code == 404
+    assert client.get("/api/v1/demo/history").status_code == 401

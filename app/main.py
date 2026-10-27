@@ -5,7 +5,7 @@ from contextlib import asynccontextmanager
 from functools import lru_cache
 from pathlib import Path
 
-from fastapi import FastAPI, HTTPException, Request
+from fastapi import Depends, FastAPI, HTTPException, Request
 from fastapi.responses import StreamingResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
@@ -17,7 +17,7 @@ from app.phase_a.models import Email
 from app.phase_a.org import check_lookalike, known_domains
 from app.phase_a.parse import parse_eml
 from app.phase_a.pipeline import analyze_events
-from app import jobs
+from app import jobs, ratelimit
 from app.integration_api import router as integration_router
 from app.phase_b.mailbox_api import router as mailbox_router
 
@@ -140,12 +140,14 @@ def get_scenario(scenario_id: str):
     return email_view(parse_eml(_scenario(scenario_id)[1]))
 
 
-@app.post("/api/scenarios/{scenario_id}/check")
+@app.post("/api/scenarios/{scenario_id}/check", dependencies=[Depends(ratelimit.public_check)])
 def check_scenario(scenario_id: str):
-    return _check_stream(parse_eml(_scenario(scenario_id)[1]))
+    e = parse_eml(_scenario(scenario_id)[1])
+    ratelimit.spend_analysis()
+    return _check_stream(e)
 
 
-@app.post("/api/check")
+@app.post("/api/check", dependencies=[Depends(ratelimit.public_check)])
 async def check_upload(request: Request):
     """Body = the raw .eml bytes (no multipart, so no extra dependency)."""
     raw = await request.body()
@@ -157,6 +159,7 @@ async def check_upload(request: Request):
         raise HTTPException(status_code=400, detail="Could not read this file as an email (.eml)")
     if "@" not in e.from_addr:
         raise HTTPException(status_code=400, detail="This file has no sender (From) address; is it an .eml file?")
+    ratelimit.spend_analysis()
     return _check_stream(e)
 
 

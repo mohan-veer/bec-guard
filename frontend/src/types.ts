@@ -42,17 +42,33 @@ export interface Callback {
   url: string | null;
 }
 
+export interface CardItem {
+  tone: "warn" | "note" | "ok";
+  text: string;
+  code: string;
+  sources: { title: string; url: string }[];
+}
+
+export interface CardSection {
+  title: string;
+  items: CardItem[];
+}
+
 export interface Card {
   message_id: string;
   decision: Decision | null;
   rule: string | null;
   intent: string;
   headline: string;
+  intro: string;
   action: string;
+  sections: CardSection[];
   explanation: string | null;
   looks_fine: string[];
   looks_unusual: string[];
+  notes: string[];
   callback: Callback | null;
+  callbacks: Callback[];
   checks: Signal[];
 }
 

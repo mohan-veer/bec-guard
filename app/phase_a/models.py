@@ -93,7 +93,8 @@ class AnalysisResult(BaseModel):
     decision: Decision | None     # None when Gate 0 finds no money or data request
     rule: str | None
     signals: list[Signal]
-    explanation: str | None = None  # plain-English summary (Ultra/Super), only for VERIFY / UNUSUAL
+    explanation: str | None = None  # no longer generated (kept for compatibility)
+    wording: dict[int, str] = {}    # signal index -> plain rewrite by Nemotron Ultra (checked by card.accept_rewrite)
 
 
 # ---------- Seeded data (data/*.json) ----------

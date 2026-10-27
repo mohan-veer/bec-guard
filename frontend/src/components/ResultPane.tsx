@@ -1,4 +1,4 @@
-import type { Card, Decision, Group, Signal } from "../types";
+import type { Card, CardSection, Decision, Group, Signal } from "../types";
 
 export interface CheckState {
   status: "idle" | "running" | "done" | "error";
@@ -55,16 +55,29 @@ function Progress({ check }: { check: CheckState }) {
   );
 }
 
-function List({ title, items, tone }: { title: string; items: string[]; tone: "fine" | "unusual" }) {
-  if (items.length === 0) return null;
+const ITEM_STYLE = {
+  warn: { icon: "⚠", color: "text-amber-600" },
+  note: { icon: "ℹ", color: "text-slate-400" },
+  ok: { icon: "✓", color: "text-emerald-600" },
+} as const;
+
+function SectionList({ section }: { section: CardSection }) {
   return (
     <div>
-      <h3 className="text-sm font-semibold text-slate-700">{title}</h3>
+      <h3 className="text-sm font-semibold text-slate-700">{section.title}</h3>
       <ul className="mt-1.5 flex flex-col gap-1 text-sm">
-        {items.map((line) => (
-          <li key={line} className="flex gap-2">
-            <span aria-hidden className={tone === "fine" ? "text-emerald-600" : "text-amber-600"}>{tone === "fine" ? "✓" : "•"}</span>
-            <span>{line}</span>
+        {section.items.map((item, i) => (
+          <li key={`${item.code}-${i}`} className="flex gap-2">
+            <span aria-hidden className={ITEM_STYLE[item.tone].color}>{ITEM_STYLE[item.tone].icon}</span>
+            <span className={item.tone === "ok" ? "text-slate-600" : ""}>
+              {item.text}
+              {item.sources?.filter((s) => /^https?:\/\//.test(s.url)).map((s) => (
+                <a key={s.url} href={s.url} target="_blank" rel="noopener noreferrer"
+                   className="ml-2 inline-block rounded bg-slate-100 px-1.5 py-0.5 text-xs text-indigo-700 hover:underline">
+                  {new URL(s.url).hostname.replace(/^www\./, "")}
+                </a>
+              ))}
+            </span>
           </li>
         ))}
       </ul>
@@ -118,19 +131,10 @@ function ResultCard({ card }: { card: Card }) {
           <span aria-hidden className={`flex size-6 items-center justify-center rounded-full text-sm font-bold ${style.badge}`}>{style.icon}</span>
           <h2 className="text-base font-semibold">{card.headline}</h2>
         </div>
-        <p className="mt-3 text-[15px] leading-relaxed font-medium">{card.action}</p>
-        {card.callback && card.decision !== "NO_ISSUES_FOUND" && (
-          <a
-            href={`tel:${card.callback.phone.replace(/[^\d+]/g, "")}`}
-            className="mt-4 inline-flex items-center gap-2 rounded-lg bg-slate-900 px-4 py-2 text-sm font-semibold text-white hover:bg-slate-800 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-900"
-          >
-            Call {card.callback.name} · {card.callback.phone}
-          </a>
-        )}
-        {card.explanation && <p className="mt-4 text-sm leading-relaxed text-slate-700">{card.explanation}</p>}
+        {card.intro && <p className="mt-2 text-sm text-slate-700">{card.intro}</p>}
+        {card.action && <p className="mt-3 text-[15px] leading-relaxed font-medium">{card.action}</p>}
       </div>
-      <List title="Looks fine" items={card.looks_fine} tone="fine" />
-      <List title="Looks unusual" items={card.looks_unusual} tone="unusual" />
+      {card.sections.map((s) => <SectionList key={s.title} section={s} />)}
       <HowChecked checks={card.checks} rule={card.rule} />
     </div>
   );

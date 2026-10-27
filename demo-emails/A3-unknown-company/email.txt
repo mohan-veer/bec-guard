@@ -1,0 +1,19 @@
+From: testvendor.26@outlook.com (display name: Henry Schein Billing)
+To: testorganization26@gmail.com
+Subject: New supplier account: Henry Schein
+Attach: HS-55120.pdf
+Expected: Red label. Web check (Nemotron Super agent + Tavily): Henry Schein's site is henryschein.com, email from outlook.com; call-back number from henryschein.com; the (206) number in the email isn't Henry Schein's; sender not in your records; address also resembles Sam Ortiz's (Acme) - supporting fact only.
+
+----- body (copy from here) -----
+Hi Jordan,
+
+We're Henry Schein, your new supplier for dental consumables. Please pay the attached invoice HS-55120 ($6,480.00) within 3 days to activate your account:
+
+Bank: Lakeshore Commerce Bank
+Routing: 999000666
+Account: 000044019055
+
+Questions? Call me directly at (206) 555-0177.
+
+Thanks,
+Henry Schein Billing

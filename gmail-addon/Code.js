@@ -3,7 +3,7 @@
 
 var SEEN_MAX = 300;          // message ids remembered as already sent
 var PENDING_MAX = 100;       // results waited for at once (= the API's batch limit)
-var SIDEBAR_WAIT_SECONDS = 10;
+var SIDEBAR_WAIT_SECONDS = 24; // Google stops add-on actions at ~30 s; a full real-model check takes ~8-15 s
 var TONE_COLORS = { verify: "#b45309", unusual: "#a16207", fine: "#047857", none: "#475569" };
 
 // ---------- config & API ----------
@@ -29,9 +29,13 @@ function parse_(resp) {
   catch (err) { return { code: resp.getResponseCode(), body: null }; }
 }
 
+function fetch_(r) { // network failures (DNS, server down) come back as code 0 instead of throwing
+  try { return parse_(UrlFetchApp.fetch(r.url, r)); }
+  catch (err) { return { code: 0, body: null, error: String(err) }; }
+}
+
 function api_(cfg, method, path, body) {
-  var r = request_(cfg, method, path, body);
-  return parse_(UrlFetchApp.fetch(r.url, r));
+  return fetch_(request_(cfg, method, path, body));
 }
 
 function mailbox_() {
@@ -61,7 +65,7 @@ function getResult_(cfg, mailbox, id) {
 
 function onGmailMessageOpen(e) {
   GmailApp.setCurrentMessageAccessToken(e.gmail.accessToken);
-  return resultCard_(e.gmail.messageId, true);
+  return resultCard_(normalizeMessageId(e.gmail.messageId), true);
 }
 
 function onRefresh(e) {
@@ -76,7 +80,7 @@ function resultCard_(messageId, submitIfNew) {
   var r = getResult_(cfg, mailbox, messageId);
   if (r.code === 404 && submitIfNew) {
     var s = submitRequest_(cfg, mailbox, messageId, "inbox");
-    var sub = parse_(UrlFetchApp.fetch(s.url, s));
+    var sub = fetch_(s);
     if (sub.code >= 400) return messageCard_("Couldn't check this email", errorText_(sub));
     for (var i = 0; i < SIDEBAR_WAIT_SECONDS / 2; i++) { // a short wait often gets the full result
       Utilities.sleep(2000);
@@ -92,28 +96,32 @@ function resultCard_(messageId, submitIfNew) {
 }
 
 function renderResult_(m, messageId) {
-  var color = TONE_COLORS[m.tone];
   var head = CardService.newCardSection()
-    .addWidget(CardService.newTextParagraph().setText('<font color="' + color + '"><b>' + esc(m.title) + "</b></font>"))
-    .addWidget(CardService.newTextParagraph().setText("<b>" + esc(m.action) + "</b>"));
-  if (m.callback && m.tone !== "fine") head.addWidget(CardService.newDecoratedText().setTopLabel("Call back on")
-    .setText(esc(m.callback)).setWrapText(true));
-  if (m.explanation) head.addWidget(CardService.newTextParagraph().setText(esc(m.explanation)));
-
+    .addWidget(CardService.newTextParagraph().setText('<font color="' + TONE_COLORS[m.tone] + '"><b>' + esc(m.title) +
+      "</b></font>"));
+  if (m.intro) head.addWidget(CardService.newTextParagraph().setText(esc(m.intro)));
+  if (m.action) head.addWidget(CardService.newTextParagraph().setText("<b>" + esc(m.action) + "</b>"));
   var card = CardService.newCardBuilder().setHeader(CardService.newCardHeader().setTitle("BEC Guard")
     .setSubtitle("Checked " + m.checksCount + " things")).addSection(head);
-  if (m.unusual.length) card.addSection(listSection_("Looks unusual", m.unusual, "•"));
-  if (m.fine.length) card.addSection(listSection_("Looks fine", m.fine, "✓").setCollapsible(true).setNumUncollapsibleWidgets(2));
+  m.sections.forEach(function (s) {
+    var section = CardService.newCardSection().setHeader(esc(s.title));
+    s.lines.forEach(function (line, i) {
+      section.addWidget(CardService.newDecoratedText().setText(esc(line)).setWrapText(true));
+      if (s.sources[i].length) { // the pages that supported this line, like citations
+        section.addWidget(CardService.newTextParagraph().setText("Source: " + s.sources[i].map(function (src) {
+          return '<a href="' + esc(src.url) + '">' + esc(src.label) + "</a>";
+        }).join(", ")));
+      }
+    });
+    var visible = s.lines.slice(0, s.important).length +
+      s.sources.slice(0, s.important).filter(function (x) { return x.length; }).length;
+    if (s.lines.length > s.important) { // keep warnings, notes and their sources visible; checks can be expanded
+      section.setCollapsible(true).setNumUncollapsibleWidgets(Math.max(1, visible));
+    }
+    card.addSection(section);
+  });
   card.addSection(CardService.newCardSection().addWidget(refreshButton_(messageId)));
   return card.build();
-}
-
-function listSection_(title, lines, bullet) {
-  var s = CardService.newCardSection().setHeader(title);
-  lines.forEach(function (line) {
-    s.addWidget(CardService.newDecoratedText().setText(bullet + " " + esc(line)).setWrapText(true));
-  });
-  return s;
 }
 
 function refreshButton_(messageId) {
@@ -128,7 +136,7 @@ function messageCard_(title, text, messageId) {
 }
 
 function errorText_(r) {
-  return (r.body && r.body.detail) ? String(r.body.detail) : "HTTP " + r.code;
+  return errorMessage(r);
 }
 
 // ---------- homepage: connection, automatic checking, mailbox settings ----------
@@ -272,7 +280,11 @@ function scanInbox() {
 
 function send_(cfg, mailbox, items) {
   if (!items.length) return;
-  UrlFetchApp.fetchAll(items.map(function (it) { return submitRequest_(cfg, mailbox, it.id, it.folder); }));
+  try {
+    UrlFetchApp.fetchAll(items.map(function (it) { return submitRequest_(cfg, mailbox, it.id, it.folder); }));
+  } catch (err) { // server unreachable: the ids stay pending and are resent on the next run
+    Logger.log("BEC Guard unreachable: " + err);
+  }
 }
 
 var LABEL_COLORS = { "BEC Guard/Verify before paying": "#cc3a21", "BEC Guard/Looks unusual": "#ffad47" };
@@ -336,4 +348,44 @@ function onSettingsCheck() {
     card.addSection(s);
   });
   return CardService.newActionResponseBuilder().setNavigation(CardService.newNavigation().pushCard(card.build())).build();
+}
+
+// ---------- demo history (run once from the script editor) ----------
+// Imports the backdated demo mailbox (Jun–Oct 2026, generated by scripts/make_demo_data.py) into THIS mailbox.
+// Imported mail keeps its own dates, so the scanner (which only looks at mail newer than its last run) ignores it.
+// Every message carries the header X-BEC-Guard-Demo: seeded-history. removeDemoHistory() moves it all to Trash.
+
+function seedDemoHistory() {
+  var cfg = getConfig_();
+  if (!cfg) throw new Error("Connect BEC Guard in the Gmail side panel first.");
+  var r = api_(cfg, "get", "/api/v1/demo/history");
+  if (r.code !== 200) throw new Error("Couldn't load the demo history: " + errorText_(r));
+  var props = PropertiesService.getUserProperties();
+  var seeded = JSON.parse(props.getProperty("demoSeeded") || "{}"); // key -> Gmail message id
+  var added = 0;
+  r.body.messages.forEach(function (m) {
+    if (seeded[m.key]) return; // already imported: safe to re-run
+    var blob = Utilities.newBlob(Utilities.base64DecodeWebSafe(m.raw), "message/rfc822");
+    var args = { internalDateSource: "dateHeader", neverMarkSpam: true };
+    var res;
+    try {
+      res = Gmail.Users.Messages.import({ labelIds: m.labels }, "me", blob, args);
+    } catch (err) { // a system label wasn't accepted: import without labels rather than skip the message
+      res = Gmail.Users.Messages.import({}, "me", blob, args);
+    }
+    seeded[m.key] = res.id;
+    added++;
+  });
+  props.setProperty("demoSeeded", JSON.stringify(seeded));
+  Logger.log("Imported " + added + " demo emails (" + Object.keys(seeded).length + " in total).");
+}
+
+function removeDemoHistory() {
+  var props = PropertiesService.getUserProperties();
+  var seeded = JSON.parse(props.getProperty("demoSeeded") || "{}");
+  Object.keys(seeded).forEach(function (key) {
+    try { Gmail.Users.Messages.trash("me", seeded[key]); } catch (err) { /* already gone */ }
+  });
+  props.deleteProperty("demoSeeded");
+  Logger.log("Moved " + Object.keys(seeded).length + " demo emails to Trash.");
 }

@@ -180,5 +180,39 @@
         }
       }
     ]
+  },
+  "<a3-henry@test>": {
+    "turns": [
+      {
+        "tool_calls": [
+          {
+            "name": "web_search",
+            "arguments": {
+              "query": "Henry Schein official website"
+            }
+          }
+        ]
+      },
+      {
+        "tool_calls": [
+          {
+            "name": "web_search",
+            "arguments": {
+              "query": "Henry Schein customer service phone",
+              "include_domains": [
+                "henryschein.com"
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "final": {
+          "official_domain": "henryschein.com",
+          "phone": "(800) 555-0123",
+          "phone_source_url": "https://www.henryschein.com/contact"
+        }
+      }
+    ]
   }
 }

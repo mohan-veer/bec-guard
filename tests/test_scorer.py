@@ -32,9 +32,14 @@ def test_rules(intent, signals, decision, rule):
     assert (r.decision, r.rule) == (decision, rule)
 
 
-def test_first_matching_rule_wins():
-    r = score(Intent.GIFT_CARDS, [sig("lookalike_domain", "strong"), sig("bank_change", "strong")])
-    assert r.rule == "bank_change"
+def test_impersonation_outranks_bank_change():
+    # Who is really writing is the headline; the new bank account is mentioned in the same action line.
+    for code in ("lookalike_domain", "address_lookalike", "known_name_new_address"):
+        assert score(Intent.PAYMENT_REQUEST, [sig(code, "strong"), sig("bank_change", "strong")]).rule == code
+
+
+def test_bank_change_from_a_trusted_sender_stays_bank_change():
+    assert score(Intent.GIFT_CARDS, [sig("bank_change", "strong")]).rule == "bank_change"
 
 
 def test_address_lookalike_rule():

@@ -1,4 +1,7 @@
-"""Domain registration date via RDAP (free, no key). Mock mode: fixtures/rdap.json. Unknown/errors -> None."""
+"""Domain registration date via RDAP (free, no key). Unknown/errors -> None.
+
+Simulated (fixtures/rdap.json) in MOCK_MODE or for the sample inbox, whose domains belong to a fictional world.
+"""
 import json
 import logging
 from datetime import date, datetime, timedelta
@@ -7,6 +10,7 @@ from pathlib import Path
 import httpx
 
 from app.config import load_settings
+from app.phase_a import data
 
 RDAP_URL = "https://rdap.org/domain/{domain}"
 FIXTURE = Path(__file__).parent.parent.parent / "fixtures" / "rdap.json"
@@ -41,7 +45,7 @@ async def registration_date(domain: str) -> date | None:
     if domain in _cache:
         return _cache[domain]
 
-    if load_settings().mock_mode:
+    if load_settings().mock_mode or data.current_profile() == data.SAMPLE:
         _cache[domain] = _mock(domain)
         return _cache[domain]
 

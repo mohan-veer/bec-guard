@@ -1,5 +1,7 @@
 """Mailbox check API (sample mailboxes). Live mailbox settings arrive through the integration API instead."""
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, Depends, HTTPException
+
+from app import ratelimit
 
 from app.clients import mailbox
 from app.phase_a.data import load_org
@@ -9,7 +11,7 @@ router = APIRouter(prefix="/api/mailbox")
 PROVIDERS = ("outlook", "gmail")
 
 
-@router.post("/{provider}/check", response_model=MailboxReport)
+@router.post("/{provider}/check", response_model=MailboxReport, dependencies=[Depends(ratelimit.public_check)])
 async def check(provider: str):
     if provider not in PROVIDERS:
         raise HTTPException(status_code=404, detail="Unknown mailbox provider")

@@ -16,6 +16,19 @@ def test_known_vendor_sender_with_auth_pass():
     assert {"known_sender", "email_auth_pass"} <= codes(s, "fine")
 
 
+def test_unknown_sender_auth_pass_is_info_only():
+    raw = (b"Message-ID: <x@y>\nFrom: Billing <billing@unknown-supplier.example>\n"
+           b"Authentication-Results: mx; spf=pass; dkim=pass; dmarc=pass\n\nhi")
+    s = {x.code: x for x in check_entity(parse_eml(raw), load_ledger(), load_org())}
+    assert "email_auth_pass" not in s
+    assert s["email_auth_unverified_sender"].verdict == "info"
+
+
+def test_free_provider_unknown_sender_has_no_extra_auth_note():
+    s = {x.code for x in _run("03_fake_ceo_gift_cards.eml")}
+    assert "free_email" in s and "email_auth_unverified_sender" not in s
+
+
 def test_fake_ceo_on_gmail():
     s = _run("03_fake_ceo_gift_cards.eml")
     assert {"known_name_new_address", "free_email", "first_contact"} <= codes(s)

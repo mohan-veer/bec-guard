@@ -20,15 +20,23 @@ def _run(name):
     return asyncio.run(analyze_eml((SCEN / name).read_bytes()))
 
 
-def test_explanation_only_when_not_fine():
-    assert _run("06_legit_invoice_control.eml").explanation is None
-    assert _run("02_hacked_vendor_thread.eml").explanation
+def test_card_wording_only_for_warnings(monkeypatch):
+    from app.phase_a import pipeline
+    calls = []
+
+    async def spy(signals, key):
+        calls.append(key)
+        return {}
+    monkeypatch.setattr(pipeline, "word_signals", spy)
+    _run("06_legit_invoice_control.eml")
+    _run("02_hacked_vendor_thread.eml")
+    assert calls == ["<s02-thread@acmesupply.com>"]
 
 
-def test_vendor_callback_comes_from_official_site_not_email():
-    cb = next(s for s in _run("02_hacked_vendor_thread.eml").signals if s.code == "callback_number")
-    assert cb.data["phone"] == "(503) 555-0142"
-    assert cb.data["from"] == "acmesupply.com"
+def test_vendor_callbacks_come_from_records_and_official_site_never_the_email():
+    cbs = [s.data for s in _run("02_hacked_vendor_thread.eml").signals if s.code == "callback_number"]
+    assert {(c["from"], c["phone"]) for c in cbs} == {("your vendor records", "(503) 555-0142"),
+                                                      ("acmesupply.com", "(503) 555-0142")}
 
 
 def test_internal_callback_comes_from_directory():

@@ -6,12 +6,20 @@ import httpx
 import pytest
 
 from app.clients import rdap, tavily_client
+from app.phase_a import data
 
 
 @pytest.fixture(autouse=True)
 def _clear_caches():
     rdap._cache.clear()
     tavily_client._cache.clear()
+
+
+@pytest.fixture
+def live_tenant():
+    # Real lookups only happen for live tenants; the sample inbox's fictional world always stays simulated.
+    with data.using_profile("riverbend"):
+        yield
 
 
 # ---------- Tavily ----------
@@ -41,7 +49,7 @@ def _fake_tavily(monkeypatch, response):
     return calls
 
 
-def test_tavily_real_passes_params_and_caches(monkeypatch):
+def test_tavily_real_passes_params_and_caches(monkeypatch, live_tenant):
     calls = _fake_tavily(monkeypatch, {"results": [{"title": "T", "url": "https://a.com", "content": "c", "score": 0.9}]})
     for _ in range(2):
         hits = asyncio.run(tavily_client.search("acme phone", include_domains=["a.com"]))
@@ -51,7 +59,7 @@ def test_tavily_real_passes_params_and_caches(monkeypatch):
     assert calls[0]["include_domains"] == ["a.com"]
 
 
-def test_tavily_error_returns_empty(monkeypatch):
+def test_tavily_error_returns_empty(monkeypatch, live_tenant):
     _fake_tavily(monkeypatch, RuntimeError("quota"))
     assert asyncio.run(tavily_client.search("x")) == []
 
@@ -70,7 +78,7 @@ def _fake_rdap(monkeypatch, handler):
     monkeypatch.setattr(rdap, "_http", lambda: httpx.AsyncClient(transport=httpx.MockTransport(handler)))
 
 
-def test_rdap_real_reads_registration_event_and_caches(monkeypatch):
+def test_rdap_real_reads_registration_event_and_caches(monkeypatch, live_tenant):
     hits = []
 
     def handler(req):
@@ -83,7 +91,7 @@ def test_rdap_real_reads_registration_event_and_caches(monkeypatch):
     assert hits == ["https://rdap.org/domain/example.com"]
 
 
-def test_rdap_404_and_errors_are_none(monkeypatch):
+def test_rdap_404_and_errors_are_none(monkeypatch, live_tenant):
     _fake_rdap(monkeypatch, lambda req: httpx.Response(404))
     assert asyncio.run(rdap.registration_date("nope.com")) is None
 

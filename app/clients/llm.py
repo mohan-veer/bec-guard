@@ -4,10 +4,12 @@ Mock mode: returns the canned response for (step, key) from fixtures/llm/<step>.
 Real mode: OpenAI SDK against Token Factory. We ask for JSON in the prompt (no vendor JSON mode: support varies
 per model), validate with Pydantic, retry once with a reminder, then return the caller's safe default.
 """
+import asyncio
 import json
 import logging
 import re
 import time
+import weakref
 from functools import lru_cache
 from pathlib import Path
 from typing import Awaitable, Callable, TypeVar
@@ -36,11 +38,18 @@ def _mock(step: str, key: str, schema: type[T]) -> T:
     return schema.model_validate(canned.get(key, canned["_default"]))
 
 
-@lru_cache
+_clients: "weakref.WeakKeyDictionary[asyncio.AbstractEventLoop, AsyncOpenAI]" = weakref.WeakKeyDictionary()
+
+
 def _client() -> AsyncOpenAI:
-    s = load_settings()
-    # max_retries: the SDK retries 429 (honours Retry-After) and 5xx.
-    return AsyncOpenAI(base_url=s.nebius_base_url, api_key=s.nebius_api_key, max_retries=2, timeout=60)
+    """One client per event loop: its connection pool belongs to the loop that created it (reusing it from another
+    loop fails with "Event loop is closed")."""
+    loop = asyncio.get_running_loop()
+    if loop not in _clients:
+        s = load_settings()
+        # max_retries: the SDK retries 429 (honours Retry-After) and 5xx.
+        _clients[loop] = AsyncOpenAI(base_url=s.nebius_base_url, api_key=s.nebius_api_key, max_retries=2, timeout=60)
+    return _clients[loop]
 
 
 def _parse(text: str, schema: type[T]) -> T:

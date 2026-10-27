@@ -1,0 +1,19 @@
+From: test.vendor26@yahoo.com
+To: testorganization26@gmail.com
+Subject: Re: Invoice ACM-10437
+Attach: ACM-10437-updated.pdf
+Expected: Red label. Sender checks PASS (real account); new account ending 7731 (on file 4821), ACH -> wire.
+
+----- body (copy from here) -----
+Hi Jordan,
+
+Quick update: we moved our banking. Please use our new account for ACM-10437 ($18,400.00):
+
+Bank: Pacific Crest Bank
+Routing: 999000222
+Account: 000058127731
+
+The updated invoice is attached. Please process today, by wire.
+
+Thanks,
+Sam

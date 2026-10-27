@@ -11,7 +11,7 @@ from pydantic import BaseModel
 
 from app.clients.llm import complete_json
 from app.config import load_settings
-from app.phase_a.entity import FREE_EMAIL_DOMAINS
+from app.phase_a.entity import FREE_EMAIL_DOMAINS, lookalike_of
 from app.phase_a.models import Attachment, Email, PaymentDetails, Signal, Vendor, VendorLedger
 
 _BANK_RE = re.compile(r"^\s*Bank(?: name)?:\s*(.+?)\s*$", re.IGNORECASE | re.MULTILINE)
@@ -57,20 +57,45 @@ def extract_payment_details(text: str) -> PaymentDetails:
     )
 
 
-def find_vendor(e: Email, ledger: VendorLedger) -> Vendor | None:
-    """The vendor this email is about: by exact contact address, then by company domain (never a free provider's
-    domain: two strangers on yahoo.com aren't the same vendor), else by a vendor or contact name."""
+_COMPANY_SUFFIXES = {"inc", "llc", "ltd", "co", "corp", "company", "the", "corporation"}
+
+
+def _company_words(name: str) -> set[str]:
+    return {w for w in re.findall(r"[a-z0-9]+", (name or "").lower()) if w not in _COMPANY_SUFFIXES}
+
+
+def same_company(a: str | None, b: str | None) -> bool:
+    """"Acme Supply LLC" == "acme supply"; one name's words contained in the other's."""
+    wa, wb = _company_words(a), _company_words(b)
+    return bool(wa and wb) and (wa <= wb or wb <= wa)
+
+
+def vendor_by_name(ledger: VendorLedger, name: str | None) -> Vendor | None:
+    return next((v for v in ledger.vendors if same_company(v.name, name)), None)
+
+
+def find_vendor_match(e: Email, ledger: VendorLedger) -> tuple[Vendor | None, str | None]:
+    """The vendor this email is about and how we know: "address" (exact contact address), "domain" (company domain,
+    never a free provider's: two strangers on yahoo.com aren't one vendor), "lookalike" (an address imitating a
+    contact), "name" (vendor or contact name in the display name)."""
     for v in ledger.vendors:
         if any(c.email.lower() == e.from_addr for c in v.contacts):
-            return v
+            return v, "address"
     for v in ledger.vendors:
         if e.from_domain in v.domains and e.from_domain not in FREE_EMAIL_DOMAINS:
-            return v
+            return v, "domain"
+    for v in ledger.vendors:
+        if lookalike_of(e.from_addr, [(c.name, c.email) for c in v.contacts]):
+            return v, "lookalike"
     name = e.from_name.strip().lower()
     for v in ledger.vendors:
         if name and (name == v.name.lower() or any(name == c.name.lower() for c in v.contacts)):
-            return v
-    return None
+            return v, "name"
+    return None, None
+
+
+def find_vendor(e: Email, ledger: VendorLedger) -> Vendor | None:
+    return find_vendor_match(e, ledger)[0]
 
 
 def _sig(code, verdict, message, weight="none") -> Signal:
@@ -91,10 +116,11 @@ def compare_to_ledger(d: PaymentDetails, v: Vendor) -> list[Signal]:
         new = f"ending {d.account_last4}" if d.account_last4 else f"at {d.bank_name or 'a different bank'}"
         where = f" in {d.found_in}" if d.found_in else ""
         out.append(_sig("bank_change", "unusual",
-                        f"New bank account {new}{where} (previously {on_file.account_last4}, used on {uses} invoices)",
+                        f"Asks to pay a new bank account {new}{where}; your {uses} paid {v.name} invoices all went to "
+                        f"account ending {on_file.account_last4}",
                         "strong"))
     elif d.account_last4:
-        out.append(_sig("bank_account_matches", "fine", f"Bank account ending {d.account_last4} matches the one on file"))
+        out.append(_sig("bank_account_matches", "fine", f"Bank account ending {d.account_last4} is the one on file"))
 
     if d.account_holder and d.account_holder.lower() != on_file.account_holder.lower():
         out.append(_sig("holder_change", "unusual",
@@ -106,10 +132,11 @@ def compare_to_ledger(d: PaymentDetails, v: Vendor) -> list[Signal]:
     if d.amount is not None:
         r = v.usual_amount
         if r.min <= d.amount <= r.max:
-            out.append(_sig("amount_in_range", "fine", f"Amount (${d.amount:,.2f}) is within {v.name}'s usual range"))
+            out.append(_sig("amount_in_range", "fine", f"The amount (${d.amount:,.2f}) is normal for {v.name}"))
         else:
             out.append(_sig("amount_out_of_range", "unusual",
-                            f"Amount (${d.amount:,.2f}) is outside {v.name}'s usual ${r.min:,.0f}–${r.max:,.0f}", "medium"))
+                            f"The amount (${d.amount:,.2f}) is unusual for {v.name} (usually ${r.min:,.0f}–${r.max:,.0f})",
+                            "medium"))
 
     on_record = next((i for i in v.past_invoices if i.number == d.invoice_number), None)
     if on_record and on_record.status == "open":
@@ -171,16 +198,18 @@ def language_signals(out: LanguageOut) -> list[Signal]:
     signals: list[Signal] = []
     rushed = out.urgency or out.pressure
     if rushed and out.secrecy:  # brief §6.3: urgency+secrecy is ONE medium signal
-        signals.append(_llm_sig("urgency_secrecy", f"{q} pushes for speed and secrecy" if q else
+        signals.append(_llm_sig("urgency_secrecy", f"Pushes for speed and secrecy ({q})" if q else
                                 "Pushes for speed and secrecy", "medium"))
     elif rushed:
-        signals.append(_llm_sig("time_pressure", f"{q} adds time pressure" if q else "Adds time pressure", "low"))
+        signals.append(_llm_sig("time_pressure", f"Sets a deadline ({q}); handle with extra care" if q else
+                                "Sets a deadline; handle with extra care", "low"))
     elif out.secrecy:
-        signals.append(_llm_sig("secrecy", f"{q} asks to keep this quiet" if q else "Asks to keep this quiet", "low"))
+        signals.append(_llm_sig("secrecy", f"Asks to keep it quiet ({q})" if q else "Asks to keep it quiet", "low"))
     if out.channel_switch:
-        signals.append(_llm_sig("channel_switch", "Asks to move the conversation to another channel", "low"))
+        signals.append(_llm_sig("channel_switch", "Asks you to use a different contact (for example a number in the "
+                                "email) instead of your usual contacts", "low"))
     if out.unusual_request:
-        signals.append(_llm_sig("unusual_request", "Unusual type of request for this sender", "low"))
+        signals.append(_llm_sig("unusual_request", "This is an unusual request for this sender", "low"))
     return signals
 
 
@@ -266,17 +295,21 @@ def render_pages(a: Attachment) -> list[bytes]:
     return pages
 
 
-def _to_details(v: VLOut, filename: str) -> PaymentDetails:
+def _to_details(v: VLOut, filename: str) -> PaymentDetails | None:
+    """None when the model found no payment fields, so the attachment is never named as the source of evidence
+    it didn't provide (e.g. mock mode, or a PDF that isn't an invoice)."""
     digits = re.sub(r"\D", "", v.account_number or "")
     method = (v.method or "").lower()
     amount = re.sub(r"[^\d.]", "", v.amount or "")
-    return PaymentDetails(
+    details = PaymentDetails(
         bank_name=v.bank_name, routing_number=re.sub(r"\D", "", v.routing_number or "") or None,
         account_last4=digits[-4:] if len(digits) >= 4 else None, account_holder=v.account_holder,
         method="wire" if "wire" in method else "ACH" if "ach" in method else "check" if "check" in method else None,
         amount=Decimal(amount) if amount else None, invoice_number=v.invoice_number, po=v.po, remit_to=v.remit_to,
-        found_in=filename,
     )
+    if not any(details.model_dump().values()):
+        return None
+    return details.model_copy(update={"found_in": filename})
 
 
 async def extract_from_attachments(e: Email) -> PaymentDetails | None:

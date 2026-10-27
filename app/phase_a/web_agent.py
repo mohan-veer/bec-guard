@@ -12,6 +12,7 @@ from urllib.parse import urlparse
 from pydantic import BaseModel
 
 from app.clients.llm import AgentFailed, complete_json, run_tool_agent
+from app.clients import tavily_client
 from app.clients.tavily_client import SearchHit, search
 from app.config import load_settings
 
@@ -64,6 +65,10 @@ class WebFinding(BaseModel):
     pages: int = 0                # result pages hosted on the official domain (evidence strength, shown in UI)
     searches: int = 0
     method: Literal["agent", "fixed"] = "agent"
+    official_url: str | None = None   # a returned page on the official domain (the evidence for the website)
+    official_title: str | None = None
+    phone_title: str | None = None
+    simulated: bool = False           # sample inbox / no Tavily key: results are fixtures, so never shown as links
 
 
 # ---------- guardrails ----------
@@ -76,17 +81,17 @@ def on_domain(host: str, domain: str) -> bool:
     return host == domain or host.endswith("." + domain)
 
 
-def _digits(phone: str) -> str:
+def phone_digits(phone: str) -> str:
     d = re.sub(r"\D", "", phone)
     return d[1:] if len(d) == 11 and d.startswith("1") else d
 
 
-def _fmt(digits: str) -> str:
+def format_phone(digits: str) -> str:
     return f"({digits[:3]}) {digits[3:6]}-{digits[6:]}"
 
 
-def _phones_in(text: str) -> set[str]:
-    return {_digits(m) for m in _PHONE_RE.findall(text or "")}
+def phones_in(text: str) -> set[str]:
+    return {phone_digits(m) for m in _PHONE_RE.findall(text or "")}
 
 
 def validate(answer: AgentAnswer, hits: list[SearchHit], email_text: str) -> WebFinding:
@@ -101,13 +106,16 @@ def validate(answer: AgentAnswer, hits: list[SearchHit], email_text: str) -> Web
         return WebFinding()
 
     pages = len({h.url for h in official})
-    want = _digits(answer.phone or "")
-    if len(want) != 10 or want in _phones_in(email_text):
-        return WebFinding(official_domain=domain, pages=pages)
-    source = next((h for h in official if want in _phones_in(h.content)), None)
+    home = min(official, key=lambda h: len(urlparse(h.url).path or "/"))  # the shortest path: usually the home page
+    base = WebFinding(official_domain=domain, pages=pages, official_url=home.url, official_title=home.title or None)
+    want = phone_digits(answer.phone or "")
+    if len(want) != 10 or want in phones_in(email_text):
+        return base
+    source = next((h for h in official if want in phones_in(h.content)), None)
     if source is None:
-        return WebFinding(official_domain=domain, pages=pages)
-    return WebFinding(official_domain=domain, phone=_fmt(want), phone_url=source.url, pages=pages)
+        return base
+    return base.model_copy(update={"phone": format_phone(want), "phone_url": source.url,
+                                   "phone_title": source.title or None})
 
 
 # ---------- agent and fallback ----------
@@ -147,7 +155,7 @@ async def _run_fixed(company: str, key: str, hits: list[SearchHit]) -> AgentAnsw
         return AgentAnswer()
     contact = await search(f"{company} contact phone", include_domains=[domain])
     hits.extend(contact)
-    phone = next((p for h in contact if on_domain(host_of(h.url), domain) for p in _phones_in(h.content)), None)
+    phone = next((p for h in contact if on_domain(host_of(h.url), domain) for p in phones_in(h.content)), None)
     return AgentAnswer(official_domain=domain, phone=phone)
 
 
@@ -160,4 +168,5 @@ async def find_official_contact(company: str, key: str, email_text: str) -> WebF
         log.warning("web agent failed for %r (%s); using fixed-step fallback", company, exc)
         answer, method = await _run_fixed(company, key, hits), "fixed"
         searches = 2 if answer.official_domain else 1
-    return validate(answer, hits, email_text).model_copy(update={"searches": searches, "method": method})
+    return validate(answer, hits, email_text).model_copy(
+        update={"searches": searches, "method": method, "simulated": tavily_client.simulated()})

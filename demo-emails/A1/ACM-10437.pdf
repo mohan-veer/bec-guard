@@ -1,0 +1,50 @@
+%PDF-1.4
+1 0 obj
+<< /Type /Catalog /Pages 2 0 R >>
+endobj
+2 0 obj
+<< /Type /Pages /Kids [3 0 R] /Count 1 >>
+endobj
+3 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Contents 4 0 R /Resources << /Font << /F1 5 0 R >> >> >>
+endobj
+4 0 obj
+<< /Length 566 >>
+stream
+BT
+/F1 12 Tf
+16 TL
+72 720 Td
+(ACME SUPPLY LLC - INVOICE) Tj T*
+(1200 Industrial Way, Portland, OR 97210) Tj T*
+(Invoice number: ACM-10437) Tj T*
+(Invoice date: 2026-10-01) Tj T*
+(Bill to: Riverbend Dental Partners) Tj T*
+(Purchase order: PO-2026-0118) Tj T*
+(Description: Clinical and office supplies \(monthly order\)) Tj T*
+(Amount due: $18,400.00) Tj T*
+(Terms: Net 30) Tj T*
+(Payment method: Wire transfer) Tj T*
+(Bank: Lakeshore Commerce Bank) Tj T*
+(Routing number: 999000666) Tj T*
+(Account number: 000044019055) Tj T*
+(Account name: Acme Supply LLC) Tj T*
+ET
+endstream
+endobj
+5 0 obj
+<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>
+endobj
+xref
+0 6
+0000000000 65535 f 
+0000000009 00000 n 
+0000000058 00000 n 
+0000000115 00000 n 
+0000000241 00000 n 
+0000000858 00000 n 
+trailer
+<< /Size 6 /Root 1 0 R >>
+startxref
+928
+%%EOF

@@ -48,3 +48,24 @@ def test_profile_is_isolated_between_concurrent_tasks():
         return await asyncio.gather(read("riverbend"), read("sample"))
     live, sample = asyncio.run(both())
     assert live[1] == ["riverbend.example"] and sample[1] == ["riverbenddental.com"]
+
+
+def test_lookalike_address_is_linked_to_the_impersonated_vendor():
+    # A1 as it really arrived: display name "Test Vendor" (not Sam's name), address imitating Sam's.
+    with data.using_profile("riverbend"):
+        ledger = data.load_ledger()
+        assert find_vendor(_email("testvendor.26@outlook.com", name="Test Vendor"), ledger).id == "acme"
+        assert find_vendor(_email("jane.doe@outlook.com", name="Jane"), ledger) is None
+
+
+def test_a1_as_delivered_compares_bank_details_and_gives_callback(monkeypatch):
+    monkeypatch.setenv("MOCK_MODE", "true")
+    from app.phase_a.pipeline import analyze
+    body = ("Our bank flagged the ACH for ACM-10437. Please send the $18,400.00 today by wire to our new account:\n"
+            "Bank: Lakeshore Commerce Bank\nRouting: 999000666\nAccount: 000044019055\nThanks, Sam")
+    with data.using_profile("riverbend"):
+        r = asyncio.run(analyze(_email("testvendor.26@outlook.com", name="Test Vendor", body=body)))
+    codes = {s.code for s in r.signals if s.verdict == "unusual"}
+    assert {"address_lookalike", "bank_change", "method_change"} <= codes
+    cb = next(s for s in r.signals if s.code == "callback_number")
+    assert cb.data["phone"] == "(503) 555-0142"

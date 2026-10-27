@@ -19,7 +19,7 @@ def test_urgency_plus_secrecy_is_one_medium_signal():
 def test_urgency_alone_is_low_with_quote():
     s = _codes(language_signals(LanguageOut(urgency=True, quotes=["Please process today"])))
     assert s["time_pressure"].weight == "low"
-    assert s["time_pressure"].message == '"Please process today" adds time pressure'
+    assert s["time_pressure"].message == 'Sets a deadline ("Please process today"); handle with extra care'
 
 
 def test_channel_switch_low_and_nothing_when_clean():
@@ -60,3 +60,20 @@ def test_vl_extracts_bank_details_from_pdf_in_mock(monkeypatch):
 def test_no_attachments_means_no_vl_call(monkeypatch):
     monkeypatch.setenv("MOCK_MODE", "true")
     assert asyncio.run(extract_from_attachments(load_scenario("02_hacked_vendor_thread.eml"))) is None
+
+
+def test_attachment_with_no_payment_fields_is_not_credited(monkeypatch):
+    # VL read nothing (e.g. mock mode, or a non-invoice PDF): the PDF must not be named as the source.
+    from app.phase_a.content import _to_details, merge_details, VLOut
+    from app.phase_a.models import PaymentDetails
+    assert _to_details(VLOut(), "x.pdf") is None
+    body = PaymentDetails(account_last4="7731")
+    assert merge_details(body, None).found_in is None
+
+
+def test_attachment_fields_win_and_are_credited():
+    from app.phase_a.content import _to_details, merge_details, VLOut
+    from app.phase_a.models import PaymentDetails
+    att = _to_details(VLOut(account_number="000058127731"), "x.pdf")
+    merged = merge_details(PaymentDetails(account_last4="4821"), att)
+    assert merged.account_last4 == "7731" and merged.found_in == "x.pdf"

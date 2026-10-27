@@ -34,7 +34,8 @@ def test_bank_change_message_has_old_and_new_accounts():
     s = compare_to_ledger(d, _vendor("acme"))
     bank = next(x for x in s if x.code == "bank_change")
     assert bank.weight == "strong"
-    assert "7731" in bank.message and "4821" in bank.message and "6 invoices" in bank.message
+    assert bank.message == ("Asks to pay a new bank account ending 7731; your 6 paid Acme Supply invoices all went "
+                            "to account ending 4821")
     assert "method_change" in codes(s)
     assert "amount_in_range" in codes(s, "fine")
 

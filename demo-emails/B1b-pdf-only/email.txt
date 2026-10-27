@@ -1,0 +1,13 @@
+From: test.vendor26@yahoo.com
+To: testorganization26@gmail.com
+Subject: Re: Invoice ACM-10437
+Attach: ACM-10437-remittance.pdf
+Expected: REAL MODELS ONLY (Nemotron Super VL reads the PDF). Red label: new account ending 7731 found in the PDF.
+
+----- body (copy from here) -----
+Hi Jordan,
+
+Please see the attached updated remittance details for ACM-10437 and use them for this payment.
+
+Thanks,
+Sam
