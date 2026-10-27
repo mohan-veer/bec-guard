@@ -107,6 +107,14 @@ function renderResult_(m, messageId) {
     var section = CardService.newCardSection().setHeader(esc(s.title));
     s.lines.forEach(function (line, i) {
       section.addWidget(CardService.newDecoratedText().setText(esc(line)).setWrapText(true));
+      var ev = s.evidence[i];
+      if (ev) { // the records behind this line (e.g. the paid invoices), new value in red
+        section.addWidget(CardService.newTextParagraph().setText(
+          '<font color="#64748b"><i>' + esc(ev.title) + "</i></font><br>" +
+          ev.rows.map(function (r) {
+            return r.flag ? '<font color="#b45309"><b>' + esc(r.text) + " ⚠</b></font>" : esc(r.text);
+          }).join("<br>") + (ev.more ? '<br><font color="#64748b">' + esc(ev.more) + "</font>" : "")));
+      }
       if (s.sources[i].length) { // the pages that supported this line, like citations
         section.addWidget(CardService.newTextParagraph().setText("Source: " + s.sources[i].map(function (src) {
           return '<a href="' + esc(src.url) + '">' + esc(src.label) + "</a>";
@@ -114,7 +122,8 @@ function renderResult_(m, messageId) {
       }
     });
     var visible = s.lines.slice(0, s.important).length +
-      s.sources.slice(0, s.important).filter(function (x) { return x.length; }).length;
+      s.sources.slice(0, s.important).filter(function (x) { return x.length; }).length +
+      s.evidence.slice(0, s.important).filter(function (x) { return x; }).length;
     if (s.lines.length > s.important) { // keep warnings, notes and their sources visible; checks can be expanded
       section.setCollapsible(true).setNumUncollapsibleWidgets(Math.max(1, visible));
     }

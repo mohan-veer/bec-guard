@@ -47,6 +47,7 @@ export interface CardItem {
   text: string;
   code: string;
   sources: { title: string; url: string }[];
+  evidence: { title: string; headers: string[]; rows: string[][]; flag_row: number | null; more: string } | null;
 }
 
 export interface CardSection {

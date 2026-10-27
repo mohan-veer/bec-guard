@@ -104,3 +104,20 @@ test("source links: shown under their line, only http(s), labelled by site and p
   assert.deepEqual(m.sections[0].sources[1], []);
   assert.equal(L.sourceLabel("https://www.henryschein.com/us-en/contact"), "henryschein.com/us-en/contact");
 });
+
+test("records evidence under a line: title, one row per record, the new value flagged", () => {
+  const ev = { title: "From your vendor records · Acme Supply", headers: ["Invoice", "Date", "Amount", "Paid to"],
+    rows: [["ACM-10436", "2026-09-01", "$19,800.00", "••••4821"], ["This email", "", "$18,400.00", "••••7731"]],
+    flag_row: 1, more: "+ 3 earlier, all paid to ••••4821" };
+  assert.deepEqual(L.evidenceView(ev), {
+    title: "From your vendor records · Acme Supply",
+    rows: [{ text: "ACM-10436 · 2026-09-01 · $19,800.00 · ••••4821", flag: false },
+           { text: "This email · $18,400.00 · ••••7731", flag: true }],
+    more: "+ 3 earlier, all paid to ••••4821" });
+  const kv = L.evidenceView({ title: "t", headers: [], rows: [["Contact on file", "Sam, s@y.com"]], flag_row: null, more: "" });
+  assert.deepEqual(kv.rows, [{ text: "Contact on file: Sam, s@y.com", flag: false }]);
+  assert.equal(L.evidenceView(null), null);
+  const m = L.cardModel({ decision: "VERIFY_BEFORE_PAYING", headline: "h", checks: [], sections: [{ title: "The request",
+    items: [{ tone: "warn", text: "x", evidence: ev }] }] });
+  assert.equal(m.sections[0].evidence[0].rows.length, 2);
+});

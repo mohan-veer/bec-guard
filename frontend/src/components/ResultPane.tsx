@@ -61,6 +61,27 @@ const ITEM_STYLE = {
   ok: { icon: "✓", color: "text-emerald-600" },
 } as const;
 
+function Evidence({ ev }: { ev: NonNullable<CardSection["items"][number]["evidence"]> }) {
+  return (
+    <div className="mt-1.5 overflow-x-auto rounded-md border border-slate-200 bg-white text-xs">
+      <div className="px-2 py-1 italic text-slate-500">{ev.title}</div>
+      <table className="w-full text-left">
+        {ev.headers.length > 0 && (
+          <thead className="text-slate-500"><tr>{ev.headers.map((h) => <th key={h} className="px-2 py-1 font-medium">{h}</th>)}</tr></thead>
+        )}
+        <tbody>
+          {ev.rows.map((row, i) => (
+            <tr key={i} className={i === ev.flag_row ? "bg-amber-50 font-semibold text-amber-800" : "text-slate-700"}>
+              {row.map((cell, j) => <td key={j} className="px-2 py-1">{cell}{i === ev.flag_row && j === row.length - 1 ? " ⚠" : ""}</td>)}
+            </tr>
+          ))}
+        </tbody>
+      </table>
+      {ev.more && <div className="px-2 py-1 text-slate-500">{ev.more}</div>}
+    </div>
+  );
+}
+
 function SectionList({ section }: { section: CardSection }) {
   return (
     <div>
@@ -77,6 +98,7 @@ function SectionList({ section }: { section: CardSection }) {
                   {new URL(s.url).hostname.replace(/^www\./, "")}
                 </a>
               ))}
+              {item.evidence && <Evidence ev={item.evidence} />}
             </span>
           </li>
         ))}

@@ -59,6 +59,16 @@ def resolve_subject(e: Email, gate: IntentOut) -> Subject:
     return Subject(vendor=vendor, how=how, company=vendor.name if vendor else claimed, resembles=None)
 
 
+def _vendor_summary(v: Vendor) -> dict:
+    paid = sum(1 for i in v.past_invoices if i.status == "paid")
+    b = v.bank_account
+    rows = [["Invoices on record", f"{len(v.past_invoices)} ({paid} paid, {len(v.past_invoices) - paid} open)"],
+            ["Usual amount", f"${v.usual_amount.min:,.0f}–${v.usual_amount.max:,.0f}"],
+            ["Account on file", f"{b.bank_name} ••••{b.account_last4} ({v.payment_method})"],
+            ["Contact on file", ", ".join(f"{c.name} ({c.email})" for c in v.contacts)]]
+    return {"title": f"From your vendor records · {v.name}", "headers": [], "rows": rows, "flag_row": None, "more": ""}
+
+
 async def run_entity(e: Email, subject: Subject) -> list[Signal]:
     signals = check_entity(e, load_ledger(), load_org())
     if subject.resembles:  # the address resembling another vendor's contact is a supporting fact, not the headline
@@ -92,10 +102,15 @@ async def run_org(e: Email, subject: Subject) -> list[Signal]:
             signals.append(records_callback(vendor))
             paid = sum(1 for i in vendor.past_invoices if i.status == "paid")
             signals.append(Signal(code="vendor_on_file", group="org", verdict="fine", source="vendor ledger",
-                                  message=f"{vendor.name} is one of your vendors ({paid} paid invoices on record)"))
+                                  message=f"{vendor.name} is one of your vendors ({paid} paid invoices on record)",
+                                  data={"evidence": _vendor_summary(vendor)}))
         elif subject.company:
+            names = ", ".join(v.name for v in load_ledger().vendors)
             signals.append(Signal(code="not_a_vendor", group="org", verdict="unusual", weight="low", source="vendor ledger",
-                                  message=f"{subject.company} isn't one of your vendors (no invoices on record)"))
+                                  message=f"{subject.company} isn't one of your vendors (no invoices on record)",
+                                  data={"evidence": {"title": "From your vendor records", "headers": [], "more": "",
+                                                     "rows": [["Vendors on file", names],
+                                                              [f"{subject.company}", "no record"]], "flag_row": 1}}))
         # Web check: an unknown company the email claims, or a vendor on file whose website we know (cross-check).
         # A vendor on file without a website isn't searched: the web's "Acme Supply" may be a different company.
         if subject.company and (vendor is None or vendor.official_website):

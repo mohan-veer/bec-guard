@@ -47,6 +47,7 @@ class Item(BaseModel):
     text: str
     code: str
     sources: list[dict] = []      # [{"title", "url"}]: the web pages that supported this line (real web results only)
+    evidence: dict | None = None  # records behind this line: {title, headers, rows, flag_row, more}
 
 
 class Section(BaseModel):
@@ -170,7 +171,8 @@ def build_card(r: AnalysisResult, e: Email) -> Card:
                             key=_sort_key)
         if in_section:
             sections.append(Section(title=title, items=[Item(tone=_tone(s), text=text[id(s)], code=s.code,
-                                                             sources=s.data.get("sources", [])) for s in in_section]))
+                                                             sources=s.data.get("sources", []),
+                                                             evidence=s.data.get("evidence")) for s in in_section]))
     return Card(
         message_id=r.message_id, decision=r.decision, rule=r.rule, intent=r.intent.value,
         headline=HEADLINES[r.decision], intro=INTROS[r.decision], action=_action(r, callbacks), explanation=None,

@@ -75,10 +75,27 @@ function cardModel(card) {
           return (i.sources || []).filter(function (src) { return /^https?:\/\/[^\s/]+\.[^\s]+$/.test(src.url); })
             .map(function (src) { return { label: sourceLabel(src.url), url: src.url }; });
         }),
+        evidence: s.items.map(function (i) { return evidenceView(i.evidence); }),
         important: s.items.filter(function (i) { return i.tone !== "ok"; }).length,
       };
     }),
     checksCount: (card.checks || []).length,
+  };
+}
+
+// Records evidence (e.g. the paid invoices behind "your 6 invoices went to account ending 4821") as compact lines.
+// Table rows join their cells with " · "; label/value rows read "Label: value". The flagged row is the new value.
+function evidenceView(ev) {
+  if (!ev || !ev.rows || !ev.rows.length) return null;
+  return {
+    title: ev.title,
+    rows: ev.rows.map(function (cells, i) {
+      var text = ev.headers && ev.headers.length
+        ? cells.filter(function (c) { return c; }).join(" · ")
+        : cells[0] + ": " + cells.slice(1).join(" ");
+      return { text: text, flag: i === ev.flag_row };
+    }),
+    more: ev.more || "",
   };
 }
 
@@ -104,5 +121,5 @@ function esc(text) {
 }
 
 if (typeof module !== "undefined") {
-  module.exports = { normalizeBaseUrl, normalizeMessageId, scanQueries, selectNew, updateSeen, labelNameFor, splitStatus, cardModel, sourceLabel, errorMessage, esc };
+  module.exports = { normalizeBaseUrl, normalizeMessageId, scanQueries, selectNew, updateSeen, labelNameFor, splitStatus, cardModel, evidenceView, sourceLabel, errorMessage, esc };
 }

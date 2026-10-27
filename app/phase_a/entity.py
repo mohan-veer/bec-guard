@@ -75,6 +75,26 @@ def _name_in_address(name: str, local: str) -> bool:
     return any(len(w) >= 3 and w in compact for w in re.findall(r"[a-z0-9]+", name.lower()))
 
 
+def contact_evidence(real: str, shown: str, ledger: VendorLedger, org: OrgDirectory) -> dict | None:
+    """The contact on file (and their past emails) behind "not the address X usually writes from"."""
+    real = real.lower()
+    for v in ledger.vendors:
+        for c in v.contacts:
+            if c.email.lower() == real:
+                dates = sorted(pe.date.isoformat() for pe in v.past_emails if pe.from_addr.lower() == real)
+                rows = [["Contact on file", f"{c.name}, {c.email}"]]
+                if dates:
+                    rows.append(["Their past emails", ", ".join(dates[-3:])])
+                rows.append(["This email", shown])
+                return {"title": f"From your vendor records · {v.name}", "headers": [], "rows": rows,
+                        "flag_row": len(rows) - 1, "more": ""}
+    for p in org.people:
+        if p.email.lower() == real:
+            rows = [["Person on file", f"{p.name} ({p.role}), {p.email}"], ["This email", shown]]
+            return {"title": "From your staff directory", "headers": [], "rows": rows, "flag_row": 1, "more": ""}
+    return None
+
+
 def check_entity(e: Email, ledger: VendorLedger, org: OrgDirectory) -> list[Signal]:
     """Who sent it. Wording is for non-technical readers: plain words, show the actual addresses, no jargon."""
     out: list[Signal] = []
@@ -87,8 +107,9 @@ def check_entity(e: Email, ledger: VendorLedger, org: OrgDirectory) -> list[Sign
     else:
         on_file = _known_identities(ledger, org).get(e.from_name.strip().lower())
         if on_file:
+            ev = contact_evidence(sorted(on_file)[0], shown, ledger, org)
             out.append(Signal(code="known_name_new_address", group="entity", verdict="unusual", weight="strong",
-                              source="rules", data={"on_file": sorted(on_file)[0]},
+                              source="rules", data={"on_file": sorted(on_file)[0], **({"evidence": ev} if ev else {})},
                               message=f'Uses the name "{e.from_name}", but writes from {shown}, not the address you '
                                       f"have on file ({sorted(on_file)[0]})"))
         elif e.from_name.strip() and not _name_in_address(e.from_name, addr.rsplit("@", 1)[0]):
@@ -99,7 +120,8 @@ def check_entity(e: Email, ledger: VendorLedger, org: OrgDirectory) -> list[Sign
             owner, real = lookalike
             out.append(Signal(code="address_lookalike", group="entity", verdict="unusual", weight="strong", source="rules",
                               message=f"Not the address {owner} usually writes from: usually {real}, this time {shown}",
-                              data={"looks_like": real, "owner": owner}))
+                              data={"looks_like": real, "owner": owner,
+                                    **({"evidence": ev} if (ev := contact_evidence(real, shown, ledger, org)) else {})}))
         # A known contact on a free provider is normal (small vendors often are); only unknown senders are flagged.
         if domain in FREE_EMAIL_DOMAINS:
             out.append(_sig("free_email", "unusual",

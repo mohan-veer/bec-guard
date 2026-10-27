@@ -102,6 +102,23 @@ def _sig(code, verdict, message, weight="none") -> Signal:
     return Signal(code=code, group="content", verdict=verdict, weight=weight, message=message, source="rules (ledger)")
 
 
+SHOWN_INVOICES = 3  # most recent paid invoices shown as evidence (arbitrary: enough to see the pattern)
+
+
+def invoice_evidence(d: PaymentDetails, v: Vendor, flag_new: bool) -> dict:
+    """The paid invoices behind "your N invoices went to account ending X", plus this email's row."""
+    last4 = v.bank_account.account_last4
+    paid = sorted((i for i in v.past_invoices if i.status == "paid" and i.bank_last4 == last4),
+                  key=lambda i: i.date, reverse=True)
+    rows = [[i.number, i.date.isoformat(), f"${i.amount:,.2f}", f"••••{i.bank_last4}"] for i in paid[:SHOWN_INVOICES]]
+    rows.append(["This email", "", f"${d.amount:,.2f}" if d.amount is not None else "",
+                 f"••••{d.account_last4}" if d.account_last4 else (d.bank_name or "")])
+    more = len(paid) - SHOWN_INVOICES
+    return {"title": f"From your vendor records · {v.name}", "headers": ["Invoice", "Date", "Amount", "Paid to"],
+            "rows": rows, "flag_row": len(rows) - 1 if flag_new else None,
+            "more": f"+ {more} earlier, all paid to ••••{last4}" if more > 0 else ""}
+
+
 def compare_to_ledger(d: PaymentDetails, v: Vendor) -> list[Signal]:
     out: list[Signal] = []
     on_file = v.bank_account
@@ -118,9 +135,10 @@ def compare_to_ledger(d: PaymentDetails, v: Vendor) -> list[Signal]:
         out.append(_sig("bank_change", "unusual",
                         f"Asks to pay a new bank account {new}{where}; your {uses} paid {v.name} invoices all went to "
                         f"account ending {on_file.account_last4}",
-                        "strong"))
+                        "strong").model_copy(update={"data": {"evidence": invoice_evidence(d, v, flag_new=True)}}))
     elif d.account_last4:
-        out.append(_sig("bank_account_matches", "fine", f"Bank account ending {d.account_last4} is the one on file"))
+        out.append(_sig("bank_account_matches", "fine", f"Bank account ending {d.account_last4} is the one on file")
+                   .model_copy(update={"data": {"evidence": invoice_evidence(d, v, flag_new=False)}}))
 
     if d.account_holder and d.account_holder.lower() != on_file.account_holder.lower():
         out.append(_sig("holder_change", "unusual",
