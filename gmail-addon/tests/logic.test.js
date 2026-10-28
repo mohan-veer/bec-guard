@@ -121,3 +121,46 @@ test("records evidence under a line: title, one row per record, the new value fl
     items: [{ tone: "warn", text: "x", evidence: ev }] }] });
   assert.equal(m.sections[0].evidence[0].rows.length, 2);
 });
+
+test("mailbox settings are re-checked on every scanner run (about every minute)", () => {
+  assert.equal(L.settingsCheckDue(null, 1000), true);              // never checked
+  assert.equal(L.settingsCheckDue(1000, 1000 + 30), false);        // a manual check just ran
+  assert.equal(L.settingsCheckDue(1000, 1000 + 55), true);         // the timer fires every 55-65 s
+});
+
+test("change history becomes sent / trashed / deleted events, drafts and incoming mail ignored", () => {
+  const ev = L.historyToEvents([
+    { messagesAdded: [{ message: { id: "s1", labelIds: ["SENT"] } }, { message: { id: "d1", labelIds: ["DRAFT", "SENT"] } },
+                      { message: { id: "i1", labelIds: ["INBOX"] } }] },
+    { labelsAdded: [{ message: { id: "m1", labelIds: ["TRASH"] }, labelIds: ["TRASH"] },
+                    { message: { id: "m2", labelIds: ["Label_3"] }, labelIds: ["Label_3"] }] },
+    { messagesDeleted: [{ message: { id: "m1" } }] },
+    { labelsAdded: [{ message: { id: "m1", labelIds: ["TRASH"] }, labelIds: ["TRASH"] }] }, // repeated: once
+  ]);
+  assert.deepEqual(ev.map((e) => e.kind + ":" + e.message_id), ["sent:s1", "trashed:m1", "deleted:m1"]);
+  assert.deepEqual(L.historyToEvents(undefined), []);
+});
+
+test("only recipients outside the company count as outside", () => {
+  const to = L.parseAddresses('Sam Ortiz <Test.Vendor26@yahoo.com>, priya.raman@riverbend.example, "J" <testorganization26@gmail.com>');
+  assert.deepEqual(to, ["test.vendor26@yahoo.com", "priya.raman@riverbend.example", "testorganization26@gmail.com"]);
+  assert.deepEqual(L.outsideRecipients(to, ["riverbend.example"], "testorganization26@gmail.com"), ["test.vendor26@yahoo.com"]);
+});
+
+test("mailbox banner: hidden when nothing is open, serious wording for high alerts", () => {
+  assert.equal(L.bannerModel({ open: 0 }), null);
+  const b = L.bannerModel({ open: 4, high: 1, summary: "s", advice: "a", items: [
+    { severity: "high", title: "Email with bank details sent outside the company" }, { severity: "review", title: "t2" },
+    { severity: "review", title: "t3" }, { severity: "review", title: "t4" }] });
+  assert.equal(b.title, "Your mailbox may be in someone else's hands");
+  assert.deepEqual(b.lines.slice(0, 2), ["Act now: Email with bank details sent outside the company", "Review: t2"]);
+  assert.equal(b.more, "and 1 more");
+  assert.equal(L.bannerModel({ open: 1, high: 0, items: [{ severity: "review", title: "x" }] }).title, "Unusual activity in your mailbox");
+});
+
+test("settings summary for the home card", () => {
+  const rep = { findings: [{ severity: "high", new_since_last_check: true }, { severity: "review" }], changes: { new: ["rule:x"] } };
+  assert.equal(L.settingsSummary(rep), "1 setting needs action now (1 new since the last check)");
+  assert.equal(L.settingsSummary({ findings: [], changes: { new: [] } }), "No risky filters or forwarding");
+  assert.equal(L.settingsSummary({ findings: [{ severity: "review" }], changes: {} }), "1 setting to review");
+});

@@ -68,7 +68,7 @@ The scanner only checks mail that arrives after it was turned on, so the history
 | Entity: free email address | ❌ outlook.com, and this sender isn't on file |
 | Content: bank details vs records | ❌ new account ending 9055 (on file: 4821, used on 6 invoices); ACH → wire |
 | Content: language (Nemotron Super) | urgency ("today") |
-| **Decision** | 🔴 **Verify before paying**: call Acme Supply at (503) 555-0142 (from your vendor records, not from this email) |
+| **Decision** | 🔴 **Verify before paying** — "Before paying, confirm the new bank details with Acme Supply at (503) 555-0142 (from your vendor records)"; the sender line shows the contact on file and their past emails |
 
 **A2. Lookalike domain (best effort)** — a "fake mailer" site sends as e.g. `ar@acmesuppIy.example`. Usually fails
 SPF/DMARC and lands in Spam (the scanner reads Spam too); delivery isn't guaranteed. Only to our own test accounts,
@@ -87,7 +87,7 @@ comes from that company's public website). Files: `demo-emails/A3-unknown-compan
 | Entity: sender not on file, free email | ❌ |
 | Entity: address resemblance | supporting fact only: "its address also resembles Sam Ortiz's address on file at Acme Supply" (the email claims another company, so Acme's invoices and amounts are not compared) |
 | Content: language (Nemotron Super) | pressure ("within 3 days") |
-| **Decision** | 🔴 **Verify before paying**: "This email says it's from Henry Schein, but it was sent from outlook.com, not Henry Schein's website (henryschein.com)… call Henry Schein at <number from henryschein.com>" |
+| **Decision** | 🔴 **Verify before paying** — no call line (no relationship with Henry Schein); The company: "Says it's Henry Schein, but Henry Schein's website is henryschein.com and this came from outlook.com" with a source link to the page the agent used; The request: the email's phone vs the website's phone, payment to an account with no record |
 
 Phone numbers on the card always come from a trusted source with its name attached: your vendor records, your
 staff directory, or the company's official website found by the agent. A number written in the email is never
@@ -106,22 +106,40 @@ offered; it is compared with the trusted ones.
 | Entity: sender on file, SPF/DKIM/DMARC | ✅ really Sam's address (this is why sender checks alone fail against account takeover) |
 | Content: bank details vs records | ❌ new account ending 7731 (on file: 4821, used on 6 invoices); ACH → wire |
 | Content: language / writing style (Nemotron Super) | time pressure; style compared with Sam's past invoice emails |
-| **Decision** | 🔴 **Verify before paying**: bank details changed, call Acme on the number in your records |
+| **Decision** | 🔴 **Verify before paying** — The sender ✓ and The company ✓, The request ⚠: the new account with the 3 latest paid invoices (all ••••4821) listed as evidence; "confirm the new bank details with Acme Supply at (503) 555-0142 (from your vendor records)" |
 
 **B1b. Same, but the new account is only in a PDF** — requires the real Nemotron Super VL model to read the PDF.
 
 **B2. Our own mailbox is hacked** — we play the attacker in `testorganization26@gmail.com`: Gmail Settings → Filters
 → create a filter matching `invoice OR payment OR bank` with **Skip the Inbox** + **Mark as read** (optionally add
 `testvendor.26@outlook.com` as a forwarding address and forward matches to it). Then BEC Guard → **Check mailbox
-settings** → "Act now: hides payment emails / forwards mail outside". Same check runs daily on its own.
+settings** → "Act now: hides payment emails / forwards mail outside".
 
-**B3. The computer is compromised** — Guardian local agent (Phase B): snapshot of startup items, scheduled tasks,
-processes, compared with a baseline; Nemotron explains anything new. Uses harmless stand-in scripts only.
+BEC Guard re-checks the settings and reads Gmail's change history every minute. A new filter, forwarding or
+"send mail as" address is marked **NEW**; so is an email sent outside with bank details, a sent email that doesn't read
+like Jordan, a sent email deleted soon after sending, or a payment email deleted. A red banner appears at the top of
+every BEC Guard card ("This was me" clears it), and serious warnings are emailed once to the compliance contact on file
+(`data/tenants/riverbend/security.json`, which the mailbox can't change). Outside office hours, everything is raised to
+"Act now".
+
+**B2b. The intruder sends from our mailbox** — from `testorganization26@gmail.com`, send Sam
+(`test.vendor26@yahoo.com`) "our remittance details have been updated" with new bank details, then delete it from Sent.
+Expected within ~1 minute: banner "Your mailbox may be in someone else's hands" (bank details sent outside; deleted
+soon after sending; writing style unlike Jordan's) and one or two emails to the compliance contact.
+Files: `demo-emails/B2-hidden-filter/steps.txt` (the filter) and `demo-emails/B2b-intruder-sends/email.txt`.
 
 ### Control: a normal invoice
 
 From the real `test.vendor26@yahoo.com`: "Invoice ACM-10438, $17,200.00, PO-2026-0125, ACH to the usual account."
 Expected: **no label**; the card says "No issues found" and lists what was checked.
+
+## How the card reads
+
+"Verify before paying" (or "Looks unusual" / "No issues found"), one intro line, a call line only when a vendor or
+colleague on file is involved (number from your records), then three sections — **The sender**, **The company**,
+**The request** — with ⚠ what looks wrong, ℹ neutral facts, ✓ what checks out. Lines based on the web link to the page
+that supported them; lines based on your records show those records (e.g. the last paid invoices). Nemotron Ultra
+rewords the warnings in plain language; code rejects any rewrite that changes an address or a number.
 
 ## Running it
 

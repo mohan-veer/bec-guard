@@ -21,8 +21,6 @@ class Settings:
     model_super: str
     model_vl: str
     model_ultra: str
-    guardian_report_url: str
-    guardian_interval_minutes: int
     api_keys: dict[str, str]      # integration API key -> tenant (from BEC_API_KEYS="tenant:key,tenant2:key2")
     rate_public_per_minute: int   # public check endpoints, per visitor IP (arbitrary defaults)
     rate_public_per_day: int
@@ -52,8 +50,6 @@ def load_settings() -> Settings:
         model_super=_env("MODEL_SUPER", "nvidia/nemotron-3-super-120b-a12b"),
         model_vl=_env("MODEL_VL", "nvidia/Nemotron-3.5-Super-VL"),
         model_ultra=_env("MODEL_ULTRA", "nvidia/Nemotron-3-Ultra-550b-a55b"),
-        guardian_report_url=_env("GUARDIAN_REPORT_URL", "http://localhost:8000/api/guardian/report"),
-        guardian_interval_minutes=int(_env("GUARDIAN_INTERVAL_MINUTES", "15")),
         api_keys=_parse_api_keys(_env("BEC_API_KEYS")),
         rate_public_per_minute=int(_env("RATE_LIMIT_PUBLIC_PER_MINUTE", "10")),
         rate_public_per_day=int(_env("RATE_LIMIT_PUBLIC_PER_DAY", "100")),

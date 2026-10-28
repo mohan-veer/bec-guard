@@ -1,0 +1,16 @@
+Scenario B2 - our own mailbox is hacked: the intruder adds a hidden filter (no email to send)
+Mailbox: testorganization26@gmail.com
+Expected (within ~1 min): red banner on every BEC Guard card + ONE email to markjrcompliance@gmail.com:
+  "New filter: from test.vendor26@yahoo.com" - catches mail from Acme Supply (a vendor on file), skips the inbox
+  (+ "outside your office hours" line if done outside Mon-Fri 08:00-18:00 PT)
+
+Before: Apps Script editor -> run resetMailboxBaseline (only needed after a BEC Guard server restart), wait 1 min.
+
+Steps
+1. Gmail -> Settings (gear) -> See all settings -> Filters and Blocked Addresses -> Create a new filter
+2. From: test.vendor26@yahoo.com -> Create filter
+3. Tick "Skip the Inbox (Archive it)" -> Create filter
+4. Wait up to 1 minute, refresh Gmail, open any email (or the BEC Guard home card)
+
+Clean up afterwards
+- Delete the filter, then click "This was me" on the banner

@@ -1,0 +1,6 @@
+{
+  "_note": "MOCK writing-style check of the mailbox owner's OWN sent mail (Nemotron Super), keyed by Gmail message id.",
+  "_default": {"mismatch": false, "reason": ""},
+  "style-mismatch": {"mismatch": true, "reason": "formal greeting and wording unlike past emails"},
+  "style-mismatch-2": {"mismatch": true, "reason": "formal greeting and wording unlike past emails"}
+}

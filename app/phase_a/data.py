@@ -3,6 +3,7 @@ data/tenants/<tenant>/ gets its own vendor ledger and org directory (the live Gm
 
 The active profile is a context variable, so concurrent analyses for different tenants never mix data.
 """
+import json
 import re
 from contextlib import contextmanager
 from contextvars import ContextVar
@@ -61,3 +62,14 @@ def load_ledger() -> VendorLedger:
 
 def load_org() -> OrgDirectory:
     return _org(_profile.get())
+
+
+@lru_cache
+def _security(profile: str) -> dict:
+    path = _dir(profile) / "security.json"
+    return json.loads(path.read_text()) if path.is_file() else {}
+
+
+def load_security() -> dict:
+    """Office hours and compliance contacts ({} = defaults, nobody to alert)."""
+    return _security(_profile.get())

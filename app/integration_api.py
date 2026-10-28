@@ -14,11 +14,12 @@ from fastapi import APIRouter, Header, HTTPException, Query
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel, Field
 
-from app import jobs, ratelimit
+from app import account_events, jobs, ratelimit
 from app.clients import mailbox as mailbox_client
 from app.config import load_settings
 from app.phase_a.data import SAMPLE, load_org, profile_for_tenant, using_profile
 from app.phase_a.parse import parse_eml
+from app.phase_b import takeover
 from app.phase_b.mailbox_check import MailboxReport, check_mailbox, explain_findings
 
 router = APIRouter(prefix="/api/v1")
@@ -62,6 +63,19 @@ class SettingsRequest(BaseModel):
     # Outlook: the Graph messageRules response, plus folder id -> display name
     rules: dict = {}
     folders: dict[str, str] = {}
+    # Gmail: users.settings.sendAs.list and getPop (takeover signals: a new "send mail as" address, POP turned on)
+    send_as: dict = {}
+    pop: dict = {}
+
+
+class MailboxRequest(BaseModel):
+    provider: Provider
+    mailbox: str = Field(min_length=3, max_length=320)
+
+
+class ActivityRequest(MailboxRequest):
+    events: list[takeover.ActivityEvent] = Field(max_length=50)
+    baseline: bool = False  # first run: past sent mail, only remembered (writing-style samples), never alerted
 
 
 def _decode(raw: str) -> bytes:
@@ -84,13 +98,18 @@ def _summary(j: jobs.Job) -> dict:
 async def ingest(req: IngestRequest, x_bec_key: str | None = Header(default=None)):
     tenant = tenant_for(x_bec_key)
     try:
-        email = parse_eml(_decode(req.raw))
+        raw = _decode(req.raw)
+        email = parse_eml(raw)
     except HTTPException:
         raise
     except Exception:
         raise HTTPException(status_code=400, detail="Could not read this as an email")
     if "@" not in email.from_addr:
         raise HTTPException(status_code=400, detail="This email has no sender (From) address")
+    account_events.record_if_provider_alert(tenant, req.mailbox, email)  # e.g. Google "New sign-in" alert
+    if req.provider == "gmail":
+        with using_profile(profile_for_tenant(tenant)):
+            takeover.check_placed(tenant, req.mailbox, req.message_id, raw, email)
     known = jobs.store.get(jobs.key(tenant, req.provider, req.mailbox, req.message_id))
     if not known or known.status == "error":  # only new analyses count against the limits
         ratelimit.ingest(tenant)
@@ -111,13 +130,13 @@ def status(req: StatusRequest, x_bec_key: str | None = Header(default=None)):
 
 
 @router.get("/messages/{provider}/{message_id}")
-def get_message(provider: Provider, message_id: str, mailbox: str = Query(min_length=3, max_length=320),
+async def get_message(provider: Provider, message_id: str, mailbox: str = Query(min_length=3, max_length=320),
                 x_bec_key: str | None = Header(default=None)):
     tenant = tenant_for(x_bec_key)
     j = jobs.store.get(jobs.key(tenant, provider, mailbox, message_id))
     if not j:
         raise HTTPException(status_code=404, detail="Unknown message")
-    return {**_summary(j), "card": j.card}
+    return {**_summary(j), "card": j.card, "mailbox_alerts": await _alerts_view(tenant, mailbox)}
 
 
 @router.get("/messages")
@@ -138,8 +157,68 @@ async def mailbox_settings(req: SettingsRequest, x_bec_key: str | None = Header(
         snap = mailbox_client.MailboxSnapshot(provider="outlook", source="live",
                                               rules=mailbox_client.normalize_graph(req.rules, req.folders))
     with using_profile(profile_for_tenant(tenant)):
-        org_domains = load_org().domains + [req.mailbox.lower().rsplit("@", 1)[-1]]  # own mailbox domain is internal
-    return await explain_findings(check_mailbox(snap, org_domains))
+        report = check_mailbox(snap, takeover.org_domains(req.mailbox), takeover.known_senders(req.mailbox))
+    # Every rule and forwarding entry (not only risky ones) is remembered, so "new since last check" is exact.
+    primary = req.mailbox.lower()
+    all_ids = {f"rule:{r.id}" for r in snap.rules} | {f"fwd:{a.email}" for a in snap.forwarding} | \
+              ({"autofwd"} if snap.auto_forward.enabled else set()) | \
+              {f"sendas:{s['sendAsEmail'].lower()}" for s in req.send_as.get("sendAs", [])
+               if s.get("sendAsEmail") and s["sendAsEmail"].lower() != primary} | \
+              ({"pop"} if req.pop.get("accessWindow") not in (None, "", "disabled") else set())
+    account_events.start_monitoring(tenant, req.mailbox, takeover.now())
+    changes = account_events.settings_changes(tenant, req.mailbox, all_ids)
+    new = set(changes["new"])
+    report = report.model_copy(update={"changes": changes, "findings": [
+        f.model_copy(update={"new_since_last_check": f.id in new}) for f in report.findings]})
+    report = await explain_findings(report)
+    with using_profile(profile_for_tenant(tenant)):
+        takeover.settings_alerts(tenant, req.mailbox, report.findings, changes["new"])
+        notify, skipped = await takeover.take_notices(tenant, req.mailbox)
+    return report.model_copy(update={"alerts": await _alerts_view(tenant, req.mailbox), "notify": notify,
+                                     "notify_skipped": skipped})
+
+
+async def _alerts_view(tenant: str, mailbox: str) -> dict:
+    with using_profile(profile_for_tenant(tenant)):
+        return await takeover.alerts_view(tenant, mailbox)
+
+
+@router.post("/mailbox-activity")
+async def mailbox_activity(req: ActivityRequest, x_bec_key: str | None = Header(default=None)):
+    """What changed in the mailbox (from the provider's change history): sent, moved to Trash, deleted."""
+    tenant = tenant_for(x_bec_key)
+    account_events.start_monitoring(tenant, req.mailbox, takeover.now())
+    with using_profile(profile_for_tenant(tenant)):
+        new = await takeover.check_activity(tenant, req.provider, req.mailbox, req.events, req.baseline)
+        notify, skipped = await takeover.take_notices(tenant, req.mailbox)
+    return {"findings": [a.model_dump(include={"id", "kind", "title", "severity", "reasons", "next_step", "at",
+                                               "outside_hours"}) for a in new],
+            "alerts": await _alerts_view(tenant, req.mailbox), "notify": notify, "notify_skipped": skipped}
+
+
+@router.post("/mailbox-alerts/ack")
+async def acknowledge_alerts(req: MailboxRequest, x_bec_key: str | None = Header(default=None)):
+    """ "This was me": clears the banner. The compliance contact has already been emailed about high alerts."""
+    tenant = tenant_for(x_bec_key)
+    account_events.acknowledge(tenant, req.mailbox)
+    return {"alerts": await _alerts_view(tenant, req.mailbox)}
+
+
+@router.get("/security-config")
+def security_config(mailbox: str = Query(default="", max_length=320), x_bec_key: str | None = Header(default=None)):
+    """What the mail-side scanner needs: which recipients are internal. Contact addresses are never listed here;
+    they only travel inside a notice."""
+    tenant = tenant_for(x_bec_key)
+    with using_profile(profile_for_tenant(tenant)):
+        s = takeover.security_settings()
+        return {"org_domains": load_org().domains, "office_hours": s.office_hours.model_dump(),
+                "notify_ready": bool(takeover.notify_recipients(s))}
+
+
+@router.get("/account-events")
+def get_account_events(x_bec_key: str | None = Header(default=None)):
+    """The mail provider's own security alerts seen in this tenant's mailboxes (newest first)."""
+    return {"events": account_events.events(tenant_for(x_bec_key))}
 
 
 @router.get("/demo/history")

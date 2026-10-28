@@ -39,6 +39,7 @@ class Job:
     decision: str | None = None
     card: dict | None = None
     created: float = field(default_factory=time.time)
+    email_time: float | None = None   # the email's own Date (epoch), if it has one
 
 
 Key = tuple[str, str, str, str]
@@ -86,7 +87,8 @@ def submit(tenant: str, provider: str, mailbox: str, message_id: str, folder: st
     if existing and existing.status != "error":
         return existing, False
     job = Job(tenant=tenant, provider=provider, mailbox=mailbox.lower(), message_id=message_id, folder=folder,
-              subject=email.subject, sender=email.from_addr_raw or email.from_addr)
+              subject=email.subject, sender=email.from_addr_raw or email.from_addr,
+              email_time=email.date.timestamp() if email.date else None)
     store[k] = job
     _evict()
     ctx = contextvars.copy_context()

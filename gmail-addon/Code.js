@@ -92,17 +92,19 @@ function resultCard_(messageId, submitIfNew) {
   if (r.code !== 200) return messageCard_("Couldn't reach BEC Guard", errorText_(r), messageId);
   if (r.body.status === "error") return messageCard_("Check failed", "BEC Guard couldn't analyze this email.", messageId);
   if (r.body.status !== "done") return messageCard_("Checking this email…", "This usually takes a few seconds.", messageId);
-  return renderResult_(cardModel(r.body.card), messageId);
+  return renderResult_(cardModel(r.body.card), messageId, bannerModel(r.body.mailbox_alerts));
 }
 
-function renderResult_(m, messageId) {
+function renderResult_(m, messageId, banner) {
   var head = CardService.newCardSection()
     .addWidget(CardService.newTextParagraph().setText('<font color="' + TONE_COLORS[m.tone] + '"><b>' + esc(m.title) +
       "</b></font>"));
   if (m.intro) head.addWidget(CardService.newTextParagraph().setText(esc(m.intro)));
   if (m.action) head.addWidget(CardService.newTextParagraph().setText("<b>" + esc(m.action) + "</b>"));
   var card = CardService.newCardBuilder().setHeader(CardService.newCardHeader().setTitle("BEC Guard")
-    .setSubtitle("Checked " + m.checksCount + " things")).addSection(head);
+    .setSubtitle("Checked " + m.checksCount + " things"));
+  if (banner) card.addSection(bannerSection_(banner));
+  card.addSection(head);
   m.sections.forEach(function (s) {
     var section = CardService.newCardSection().setHeader(esc(s.title));
     s.lines.forEach(function (line, i) {
@@ -131,6 +133,32 @@ function renderResult_(m, messageId) {
   });
   card.addSection(CardService.newCardSection().addWidget(refreshButton_(messageId)));
   return card.build();
+}
+
+// Shown above everything else while a mailbox warning is open (from the server, so every card agrees).
+function bannerSection_(b) {
+  var s = CardService.newCardSection()
+    .addWidget(CardService.newTextParagraph().setText('<font color="#b91c1c"><b>⚠ ' + esc(b.title) + "</b></font>"));
+  if (b.summary) s.addWidget(CardService.newTextParagraph().setText(esc(b.summary)));
+  b.lines.forEach(function (line) { s.addWidget(CardService.newDecoratedText().setText("• " + esc(line)).setWrapText(true)); });
+  if (b.more) s.addWidget(CardService.newTextParagraph().setText('<font color="#64748b">' + esc(b.more) + "</font>"));
+  if (b.advice) s.addWidget(CardService.newTextParagraph().setText("<b>" + esc(b.advice) + "</b>"));
+  return s.addWidget(CardService.newTextButton().setText("This was me")
+    .setOnClickAction(CardService.newAction().setFunctionName("onAckAlerts")));
+}
+
+function onAckAlerts() {
+  var cfg = getConfig_();
+  var r = api_(cfg, "post", "/api/v1/mailbox-alerts/ack", { provider: "gmail", mailbox: mailbox_() });
+  if (r.code !== 200) return notify_("Couldn't clear the warning: " + errorText_(r));
+  saveAlerts_(r.body.alerts);
+  return CardService.newActionResponseBuilder()
+    .setNotification(CardService.newNotification().setText("Cleared. Serious warnings were already sent to your compliance contact."))
+    .setNavigation(CardService.newNavigation().updateCard(onHomepage())).build();
+}
+
+function saveAlerts_(view) {
+  PropertiesService.getUserProperties().setProperty("lastAlerts", JSON.stringify(view || { open: 0 }));
 }
 
 function refreshButton_(messageId) {
@@ -162,6 +190,12 @@ function onHomepage(e) {
       .setText(on ? "On: new mail is checked every minute" : "Off").setWrapText(true));
   if (last) s.addWidget(CardService.newDecoratedText().setTopLabel("Last scan")
     .setText(new Date(Number(last) * 1000).toLocaleString()));
+  var settings = props.getProperty("lastSettingsSummary");
+  if (settings) s.addWidget(CardService.newDecoratedText().setTopLabel("Mailbox settings (checked every minute)")
+    .setText(esc(settings)).setWrapText(true));
+  var stats = JSON.parse(props.getProperty("runStats") || "null");
+  if (stats && stats.runs) s.addWidget(CardService.newDecoratedText().setTopLabel("Scanner run time (average)")
+    .setText((stats.ms / stats.runs / 1000).toFixed(1) + " s over " + stats.runs + " runs"));
   s.addWidget(CardService.newButtonSet()
     .addButton(CardService.newTextButton().setText(on ? "Turn off" : "Turn on")
       .setOnClickAction(CardService.newAction().setFunctionName(on ? "onScannerOff" : "onScannerOn")))
@@ -169,8 +203,11 @@ function onHomepage(e) {
       .setOnClickAction(CardService.newAction().setFunctionName("onSettingsCheck")))
     .addButton(CardService.newTextButton().setText("Edit connection")
       .setOnClickAction(CardService.newAction().setFunctionName("onEditConnection"))));
-  return CardService.newCardBuilder().setHeader(CardService.newCardHeader().setTitle("BEC Guard")
-    .setSubtitle("Checks payment and data requests before you act")).addSection(s).build();
+  var card = CardService.newCardBuilder().setHeader(CardService.newCardHeader().setTitle("BEC Guard")
+    .setSubtitle("Checks payment and data requests before you act"));
+  var banner = bannerModel(JSON.parse(props.getProperty("lastAlerts") || "null"));
+  if (banner) card.addSection(bannerSection_(banner));
+  return card.addSection(s).build();
 }
 
 function setupCard_(note) {
@@ -222,8 +259,7 @@ function scannerInstalled_() {
 
 function installScanner() { // can also be run once from the script editor
   uninstallScanner();
-  ScriptApp.newTrigger("scanInbox").timeBased().everyMinutes(1).create();
-  ScriptApp.newTrigger("reportSettings").timeBased().everyDays(1).create();
+  ScriptApp.newTrigger("scanInbox").timeBased().everyMinutes(1).create(); // also checks activity and settings
 }
 
 function uninstallScanner() {
@@ -244,12 +280,13 @@ function onScannerOff() {
   return CardService.newActionResponseBuilder().setNavigation(CardService.newNavigation().updateCard(onHomepage())).build();
 }
 
-// Runs every minute. Must stay fast (Apps Script: 90 trigger-minutes/day): it only sends new mail and collects
-// finished results; the analysis itself happens on the BEC Guard server.
+// Runs every minute. Must stay fast (Apps Script: 90 trigger-minutes/day): it sends new mail, collects finished
+// results, reports what changed in the mailbox and checks the settings; the analysis happens on the BEC Guard server.
 function scanInbox() {
   var lock = LockService.getUserLock();
   if (!lock.tryLock(5000)) return;
   try {
+    var started = Date.now();
     var cfg = getConfig_();
     if (!cfg) return;
     var props = PropertiesService.getUserProperties();
@@ -282,9 +319,109 @@ function scanInbox() {
       }
     }
     props.setProperties({ lastScan: String(now), seen: JSON.stringify(seen), pending: JSON.stringify(pending) });
+    checkActivity_(cfg, mailbox); // after the inbox scan, so BEC Guard already knows mail that gets deleted
+    if (settingsCheckDue(Number(props.getProperty("lastSettingsCheck")) || null, now)) reportSettings();
+    recordRunTime_(props, Date.now() - started);
   } finally {
     lock.releaseLock();
   }
+}
+
+// Apps Script allows 90 min/day of timer runtime on gmail.com accounts: the home card shows the average run time.
+function recordRunTime_(props, ms) {
+  var stats = JSON.parse(props.getProperty("runStats") || '{"runs":0,"ms":0}');
+  if (stats.runs >= 1000) stats = { runs: 0, ms: 0 }; // keep it recent
+  props.setProperty("runStats", JSON.stringify({ runs: stats.runs + 1, ms: stats.ms + ms }));
+}
+
+// ---------- mailbox activity (Gmail change history): sent, moved to Trash, deleted ----------
+
+function securityConfig_(cfg) {
+  var cache = CacheService.getUserCache();
+  var cached = cache.get("securityConfig");
+  if (cached) return JSON.parse(cached);
+  var r = api_(cfg, "get", "/api/v1/security-config");
+  if (r.code !== 200) return null;
+  cache.put("securityConfig", JSON.stringify(r.body), 3600);
+  return r.body;
+}
+
+function checkActivity_(cfg, mailbox) {
+  var props = PropertiesService.getUserProperties();
+  var conf = securityConfig_(cfg);
+  if (!conf) return;
+  var start = props.getProperty("historyId");
+  if (!start) { // first run: remember where the history starts, and learn how the owner writes to outsiders
+    props.setProperty("historyId", String(Gmail.Users.getProfile("me").historyId));
+    sendActivity_(cfg, mailbox, pastSentEvents_(conf, mailbox), true);
+    return;
+  }
+  var records = [], page, latest = start;
+  try {
+    do {
+      page = Gmail.Users.History.list("me", { startHistoryId: start, maxResults: 100, pageToken: page && page.nextPageToken,
+        historyTypes: ["messageAdded", "messageDeleted", "labelAdded"] });
+      records = records.concat(page.history || []);
+      latest = page.historyId || latest;
+    } while (page.nextPageToken && records.length < 500);
+  } catch (err) { // history too old (e.g. the scanner was off for a week): start again from now
+    props.setProperty("historyId", String(Gmail.Users.getProfile("me").historyId));
+    return;
+  }
+  var events = historyToEvents(records).map(function (ev) { return withDetails_(ev, conf, mailbox); });
+  if (!events.length || sendActivity_(cfg, mailbox, events, false)) props.setProperty("historyId", String(latest));
+}
+
+// Adds who / what / when. Sent mail to outside recipients also carries the email itself (bank details, style).
+function withDetails_(ev, conf, mailbox) {
+  ev.detected_at = Math.floor(Date.now() / 1000);
+  if (ev.kind === "deleted") return ev; // gone: BEC Guard knows it from the scan or the sent event
+  try {
+    var m = Gmail.Users.Messages.get("me", ev.message_id, { format: "metadata",
+      metadataHeaders: ["From", "To", "Cc", "Bcc", "Subject"] });
+    var h = {};
+    (m.payload.headers || []).forEach(function (x) { h[x.name.toLowerCase()] = x.value; });
+    ev.message_time = Math.floor(Number(m.internalDate) / 1000);
+    ev.labels = m.labelIds || ev.labels;
+    ev.from = (parseAddresses(h.from)[0] || "");
+    ev.subject = h.subject || "";
+    ev.to = parseAddresses([h.to, h.cc, h.bcc].join(","));
+    if (ev.kind === "sent" && outsideRecipients(ev.to, conf.org_domains, mailbox).length) ev.raw = rawOf_(ev.message_id);
+  } catch (err) { /* deleted in the meantime: send what we have */ }
+  return ev;
+}
+
+// Run from the script editor after the BEC Guard server restarts (it keeps history in memory): the next scanner
+// run starts the change history again and re-sends the past outside emails used for the writing-style check.
+function resetMailboxBaseline() {
+  PropertiesService.getUserProperties().deleteProperty("historyId");
+  CacheService.getUserCache().remove("securityConfig");
+}
+
+function pastSentEvents_(conf, mailbox) {
+  var res = Gmail.Users.Messages.list("me", { q: "in:sent newer_than:180d", maxResults: 15 });
+  var events = (res.messages || []).map(function (m) { return withDetails_({ kind: "sent", message_id: m.id, labels: ["SENT"] }, conf, mailbox); });
+  return events.filter(function (ev) { return ev.raw; }).slice(0, 5);
+}
+
+function sendActivity_(cfg, mailbox, events, baseline) {
+  for (var i = 0; i === 0 || i < events.length; i += 50) { // at least one call, so the banner state is fresh
+    var r = api_(cfg, "post", "/api/v1/mailbox-activity",
+      { provider: "gmail", mailbox: mailbox, events: events.slice(i, i + 50), baseline: baseline });
+    if (r.code !== 200) return false;
+    handleAlerts_(r.body);
+  }
+  return true;
+}
+
+// Saves the banner and sends the compliance emails the server asked for (high alerts, each emailed once).
+function handleAlerts_(body) {
+  saveAlerts_(body.alerts);
+  (body.notify || []).forEach(function (n) {
+    try { MailApp.sendEmail({ to: n.to.join(","), subject: n.subject, body: n.body, htmlBody: n.html, name: "BEC Guard" }); }
+    catch (err) { Logger.log("Couldn't send the compliance alert: " + err); }
+  });
+  if (body.notify_skipped) Logger.log(body.notify_skipped);
 }
 
 function send_(cfg, mailbox, items) {
@@ -335,9 +472,15 @@ function reportSettings() {
     filters: Gmail.Users.Settings.Filters.list("me") || {},
     forwarding: Gmail.Users.Settings.ForwardingAddresses.list("me") || {},
     auto_forwarding: Gmail.Users.Settings.getAutoForwarding("me") || {},
+    send_as: Gmail.Users.Settings.SendAs.list("me") || {},
+    pop: Gmail.Users.Settings.getPop("me") || {},
   };
   var r = api_(cfg, "post", "/api/v1/mailbox-settings", payload);
-  return r.code === 200 ? r.body : null;
+  if (r.code !== 200) return null;
+  handleAlerts_(r.body);
+  PropertiesService.getUserProperties().setProperties({
+    lastSettingsCheck: String(Math.floor(Date.now() / 1000)), lastSettingsSummary: settingsSummary(r.body) });
+  return r.body;
 }
 
 function onSettingsCheck() {
@@ -350,7 +493,8 @@ function onSettingsCheck() {
       .setText('<font color="#047857"><b>No risky filters or forwarding found.</b></font>')));
   }
   report.findings.forEach(function (f) {
-    var s = CardService.newCardSection().setHeader((f.severity === "high" ? "Act now: " : "Review: ") + esc(f.rule_name));
+    var s = CardService.newCardSection().setHeader((f.new_since_last_check ? "NEW · " : "") +
+      (f.severity === "high" ? "Act now: " : "Review: ") + esc(f.rule_name));
     f.reasons.forEach(function (r) { s.addWidget(CardService.newDecoratedText().setText("• " + esc(r)).setWrapText(true)); });
     if (f.explanation) s.addWidget(CardService.newTextParagraph().setText(esc(f.explanation)));
     s.addWidget(CardService.newTextParagraph().setText("<b>" + esc(f.next_step) + "</b>"));

@@ -1,10 +1,12 @@
 # BEC Guard for Gmail (Apps Script add-on)
 
 What it does, inside Gmail:
-- **Sidebar**: open an email → the BEC Guard card (what to do first, what looks unusual, what looks fine).
-- **Automatic checking**: every minute, new mail in Inbox and Spam is sent to BEC Guard; risky mail gets a label
+- **Sidebar**: open an email → the BEC Guard card: the decision, then what was checked about the sender, the company
+  and the request, with source links and the records behind each finding.
+- **Automatic checking**: every minute, new mail in Inbox, Spam and anywhere else it was filed (a hacker's hidden
+  filter often archives payment emails) is sent to BEC Guard; risky mail gets a label
   `BEC Guard/Verify before paying` or `BEC Guard/Looks unusual`. Clean mail is left alone.
-- **Mailbox settings**: daily (or on demand) check of filters and forwarding for signs of a hacked account.
+- **Mailbox takeover checks** (every minute, with the scanner): new filters, forwarding, "send mail as" addresses and POP access; sent mail to outside addresses (bank details, writing style); sent mail deleted soon after sending; payment or security emails deleted. A banner shows on every card ("This was me" clears it) and serious warnings are emailed once to the compliance contact on the BEC Guard server.
 
 It talks only to the BEC Guard API (`/api/v1`), authenticated with your organization's API key.
 
@@ -34,6 +36,11 @@ the add-on is installed as a test deployment.
 Script editor → choose `seedDemoHistory` → **Run**. It imports 22 backdated emails (June–October 2026, with invoice
 PDFs) from BEC Guard into this mailbox; re-running is safe. `removeDemoHistory` moves them all to Trash. The dataset
 and the live test emails are described in [docs/DEMO_SCENARIOS.md](../docs/DEMO_SCENARIOS.md).
+
+## Updating
+After any change to `Logic.js` or `Code.js`, paste both again into the script editor (`Logic.gs`, `Code.gs`), save,
+and refresh Gmail. The test deployment always runs the latest saved code. If the server URL changes, use
+**Edit connection** on the BEC Guard home card.
 
 ## Develop
 - Pure logic is in `Logic.js` and tested with Node's built-in runner: `node --test gmail-addon/tests/logic.test.js`

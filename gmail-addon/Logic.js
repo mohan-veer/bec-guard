@@ -28,6 +28,73 @@ function normalizeMessageId(id) {
   return s.indexOf("msg-f:") === 0 ? BigInt(s.slice(6)).toString(16) : s;
 }
 
+// Every scanner run (the 1-minute timer fires every 55-65 s): a hacker's hidden filter is usually added right after
+// they log in. Gmail sends no push event for settings changes, so they are always polled.
+var SETTINGS_EVERY_SECONDS = 50;
+
+function settingsCheckDue(lastCheckEpoch, nowEpoch) {
+  return !lastCheckEpoch || nowEpoch - lastCheckEpoch >= SETTINGS_EVERY_SECONDS;
+}
+
+function settingsSummary(report) {
+  var high = report.findings.filter(function (f) { return f.severity === "high"; }).length;
+  var review = report.findings.length - high;
+  var fresh = ((report.changes || {}).new || []).length;
+  var newPart = fresh ? " (" + fresh + " new since the last check)" : "";
+  if (high) return high + " setting" + (high > 1 ? "s need" : " needs") + " action now" + newPart;
+  if (review) return review + " setting" + (review > 1 ? "s" : "") + " to review" + newPart;
+  return "No risky filters or forwarding";
+}
+
+// Gmail change history (users.history.list records) -> activity events for BEC Guard: sent mail, mail moved to
+// Trash, mail permanently deleted. Drafts and incoming mail are ignored here (the inbox scan handles new mail).
+function historyToEvents(records) {
+  var out = [], seen = {};
+  function add(kind, msg) {
+    var k = kind + ":" + msg.id;
+    if (seen[k]) return;
+    seen[k] = true;
+    out.push({ kind: kind, message_id: msg.id, labels: msg.labelIds || [] });
+  }
+  (records || []).forEach(function (h) {
+    (h.messagesAdded || []).forEach(function (a) {
+      var labels = a.message.labelIds || [];
+      if (labels.indexOf("SENT") >= 0 && labels.indexOf("DRAFT") < 0) add("sent", a.message);
+    });
+    (h.labelsAdded || []).forEach(function (a) {
+      if ((a.labelIds || []).indexOf("TRASH") >= 0) add("trashed", a.message);
+    });
+    (h.messagesDeleted || []).forEach(function (a) { add("deleted", a.message); });
+  });
+  return out;
+}
+
+// "Sam Ortiz <Sam@X.com>, b@y.com" -> ["sam@x.com", "b@y.com"]
+function parseAddresses(header) {
+  return (String(header || "").match(/[\w.+'-]+@[\w-]+(\.[\w-]+)+/g) || []).map(function (a) { return a.toLowerCase(); });
+}
+
+// Only mail going outside the company is sent to BEC Guard for the bank-details and writing-style checks.
+function outsideRecipients(addresses, orgDomains, mailbox) {
+  var own = String(mailbox || "").toLowerCase();
+  return (addresses || []).filter(function (a) {
+    return a !== own && (orgDomains || []).indexOf(a.split("@")[1]) < 0;
+  });
+}
+
+// The banner at the top of every card while a mailbox warning is open.
+function bannerModel(view) {
+  if (!view || !view.open) return null;
+  var titles = (view.items || []).slice(0, 3).map(function (a) {
+    return (a.severity === "high" ? "Act now: " : "Review: ") + a.title;
+  });
+  return {
+    title: view.high ? "Your mailbox may be in someone else's hands" : "Unusual activity in your mailbox",
+    summary: view.summary || "", advice: view.advice || "", lines: titles,
+    more: view.open > 3 ? "and " + (view.open - 3) + " more" : "",
+  };
+}
+
 function selectNew(ids, seen) {
   var s = {};
   (seen || []).forEach(function (id) { s[id] = true; });
@@ -121,5 +188,5 @@ function esc(text) {
 }
 
 if (typeof module !== "undefined") {
-  module.exports = { normalizeBaseUrl, normalizeMessageId, scanQueries, selectNew, updateSeen, labelNameFor, splitStatus, cardModel, evidenceView, sourceLabel, errorMessage, esc };
+  module.exports = { historyToEvents, parseAddresses, outsideRecipients, bannerModel, normalizeBaseUrl, normalizeMessageId, scanQueries, settingsCheckDue, settingsSummary, selectNew, updateSeen, labelNameFor, splitStatus, cardModel, evidenceView, sourceLabel, errorMessage, esc };
 }

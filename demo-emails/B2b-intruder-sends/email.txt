@@ -1,0 +1,35 @@
+From: testorganization26@gmail.com (send it from the organization mailbox: you are playing the intruder)
+To: test.vendor26@yahoo.com
+Subject: Re: Invoice ACM-10437
+Attach: none (BEC Guard checks the text of sent mail; a PDF wouldn't change the result)
+Expected (within ~1 min of sending + deleting): red banner + one or two emails to markjrcompliance@gmail.com:
+  - "Email with bank details sent outside the company" (Lakeshore Commerce Bank, routing 999000666, account ending 9055)
+  - "A sent email doesn't read like your past emails" (formal tone vs Jordan's short "Hi Sam ... Jordan" replies)
+  - "A sent email was deleted soon after sending" (step 2 below)
+  - each with "outside your office hours" if sent outside Mon-Fri 08:00-18:00 PT
+
+Before: Apps Script editor -> run resetMailboxBaseline (only needed after a BEC Guard server restart), wait 1 min,
+so BEC Guard has learned Jordan's writing style from his past emails to Sam.
+
+Steps
+1. Send the email below
+2. Straight away: Sent -> open it -> Delete (moves it to Trash)
+3. Wait up to 1 minute, refresh Gmail, open any email
+
+Clean up afterwards: click "This was me" on the banner; delete the email from Trash and from Sam's Yahoo inbox.
+
+----- body (copy from here) -----
+Dear Samuel,
+
+Kindly be informed that our remittance details have been updated. The credit of $1,250.00 for the October
+overpayment should be sent to our new account:
+
+Bank: Lakeshore Commerce Bank
+Routing: 999000666
+Account: 000044019055
+
+Please revert at your earliest convenience.
+
+Warm regards,
+Accounts Department
+Riverbend Dental Partners

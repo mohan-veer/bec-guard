@@ -2,7 +2,8 @@
 
 Severity:
 - high:   forwards outside the org; or hides mail (delete, mark read, obscure folder, skip inbox) AND triggers on
-          payment words; or has a meaningless name AND hides mail
+          payment words or on a vendor / colleague on file (hides the real vendor's replies); or has a meaningless
+          name AND hides mail
 - review: deletes / marks read / moves to an obscure folder on its own; or a meaningless name on its own
 - not flagged: skipping the inbox or moving to an ordinary folder on its own (very common for newsletters)
 """
@@ -48,6 +49,7 @@ class Finding(BaseModel):
     reasons: list[str]
     next_step: str
     explanation: str | None = None
+    new_since_last_check: bool = False
 
 
 class MailboxReport(BaseModel):
@@ -58,6 +60,10 @@ class MailboxReport(BaseModel):
     findings: list[Finding]
     limits: list[str]
     notes: list[str] = []
+    changes: dict = {}            # {"first_check": bool, "new": [finding ids new since the previous check]}
+    alerts: dict = {}             # the mailbox banner (takeover.alerts_view)
+    notify: list[dict] = []       # compliance emails for the add-on to send now
+    notify_skipped: str = ""
 
 
 def _external(address: str, org_domains: list[str]) -> bool:
@@ -68,7 +74,7 @@ def _meaningless(name: str) -> bool:
     return len(re.sub(r"[\W_]+", "", name)) <= 1
 
 
-def _check_rule(r: Rule, org_domains: list[str]) -> Finding | None:
+def _check_rule(r: Rule, org_domains: list[str], known: dict[str, str]) -> Finding | None:
     outside = [a for a in r.forward_to if _external(a, org_domains)]
     obscure = bool(r.move_to and r.move_to_named and r.move_to.lower() in OBSCURE_FOLDERS)
     unnamed_folder = bool(r.move_to and not r.move_to_named)
@@ -76,8 +82,9 @@ def _check_rule(r: Rule, org_domains: list[str]) -> Finding | None:
     hides = strong_hide or r.skips_inbox or unnamed_folder
     payment = sorted({k for k in r.keywords if PAYMENT_WORDS.search(k)})
     meaningless = r.provider == "outlook" and _meaningless(r.name)
+    matched = sorted({who for k in r.keywords for addr, who in known.items() if addr in k.lower()})
 
-    if outside or (hides and payment) or (meaningless and hides):
+    if outside or (hides and (payment or matched)) or (meaningless and hides):
         severity = "high"
     elif strong_hide or meaningless:
         severity = "review"
@@ -87,6 +94,8 @@ def _check_rule(r: Rule, org_domains: list[str]) -> Finding | None:
     reasons = [f"Forwards mail to an outside address: {a}" for a in outside]
     if payment:
         reasons.append(f"Triggers on payment words: {', '.join(payment)}")
+    if matched and hides:
+        reasons.append(f"Catches mail from {', '.join(matched)}")
     if r.delete:
         reasons.append("Deletes matching mail")
     if r.mark_read:
@@ -95,7 +104,7 @@ def _check_rule(r: Rule, org_domains: list[str]) -> Finding | None:
         reasons.append(f'Moves mail to "{r.move_to}", a folder people rarely check')
     if unnamed_folder and (payment or meaningless):
         reasons.append("Moves mail to a folder (name not available)")
-    if r.skips_inbox and (payment or meaningless or outside):
+    if r.skips_inbox and (payment or matched or meaningless or outside):
         reasons.append("Skips the inbox (archives matching mail)")
     if meaningless:
         reasons.append(f'Has a meaningless name ("{r.name}"), a common way to hide a rule')
@@ -103,9 +112,10 @@ def _check_rule(r: Rule, org_domains: list[str]) -> Finding | None:
                    reasons=reasons, next_step=NEXT_STEPS[("rule", severity)])
 
 
-def check_mailbox(snap: MailboxSnapshot, org_domains: list[str]) -> MailboxReport:
+def check_mailbox(snap: MailboxSnapshot, org_domains: list[str], known: dict[str, str] | None = None) -> MailboxReport:
+    """known: address or domain (lowercase) -> who it is, e.g. "Acme Supply (a vendor on file)"."""
     enabled = [r for r in snap.rules if r.enabled]
-    findings = [f for r in enabled if (f := _check_rule(r, org_domains))]
+    findings = [f for r in enabled if (f := _check_rule(r, org_domains, known or {}))]
 
     for a in snap.forwarding:
         if _external(a.email, org_domains):
@@ -149,15 +159,25 @@ class _ExplainOut(BaseModel):
     items: list[_Item] = []
 
 
+# The scanner checks settings every minute: a finding is explained once, not on every check (same facts, same text).
+_explained: dict[tuple, str] = {}
+
+
+def _facts_key(f: Finding) -> tuple:
+    return f.rule_name, tuple(f.reasons)
+
+
 async def explain_findings(report: MailboxReport) -> MailboxReport:
-    if not report.findings:
-        return report
-    facts = "\n".join(f"- id={f.id}: {f.rule_name}: {'; '.join(f.reasons)}" for f in report.findings)
-    out = await complete_json(
-        step="mailbox_explain", key=f"{report.provider}:{report.source}", model=load_settings().model_super,
-        messages=[{"role": "system", "content": EXPLAIN_SYSTEM}, {"role": "user", "content": facts}],
-        schema=_ExplainOut, default=_ExplainOut(),
-    )
-    by_id = {i.id: i.explanation for i in out.items}
-    return report.model_copy(update={"findings": [f.model_copy(update={"explanation": by_id.get(f.id)})
+    todo = [f for f in report.findings if _facts_key(f) not in _explained]
+    if todo:
+        facts = "\n".join(f"- id={f.id}: {f.rule_name}: {'; '.join(f.reasons)}" for f in todo)
+        out = await complete_json(
+            step="mailbox_explain", key=f"{report.provider}:{report.source}", model=load_settings().model_super,
+            messages=[{"role": "system", "content": EXPLAIN_SYSTEM}, {"role": "user", "content": facts}],
+            schema=_ExplainOut, default=_ExplainOut(),
+        )
+        by_id = {i.id: i.explanation for i in out.items}
+        for f in todo:  # also remembered when the model gave nothing: the card works without it
+            _explained[_facts_key(f)] = by_id.get(f.id) or ""
+    return report.model_copy(update={"findings": [f.model_copy(update={"explanation": _explained.get(_facts_key(f)) or None})
                                                   for f in report.findings]})
