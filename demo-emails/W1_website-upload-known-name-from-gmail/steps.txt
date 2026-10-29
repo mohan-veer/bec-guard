@@ -1,0 +1,21 @@
+Try it → Sample inbox → "Upload .eml" → choose lena-personal-email.eml
+
+Scenario: a scammer uses the name of Acme Supply's account manager, Lena Brooks (she IS in Riverbend's records,
+as lena.brooks@acmesupply.com), but writes from a personal Gmail address. "Our office mail server is down", new bank
+account, pay today by wire, keep it quiet.
+
+Expected card: Verify before paying
+  The sender
+    ⚠ Uses the name "Lena Brooks", but writes from lena.brooks.acme@gmail.com, not the address you have on file
+      (lena.brooks@acmesupply.com)
+    ⚠ Sent from a free Gmail address (gmail.com), not a company email
+  The request
+    ⚠ New bank account ending 3344; your 6 paid Acme Supply invoices all went to account ending 4821
+    ⚠ Asks to switch from ACH to wire
+    (real models only) secrecy: "keep this between us"; pressure: "today"
+
+Note: the email passes Gmail's sender checks (spf/dkim/dmarc=pass), because it really was sent from gmail.com.
+BEC Guard still catches it: the name is known, the address and the bank account are not.
+
+Checked in mock mode on 2026-10-29: Verify before paying (rule: known name, new address). Wording can differ slightly
+with the real models.

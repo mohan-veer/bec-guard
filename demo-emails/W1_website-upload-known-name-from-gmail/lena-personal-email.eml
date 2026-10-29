@@ -1,0 +1,26 @@
+Message-ID: <tryit-lena-0001@mail.gmail.com>
+Date: Thu, 29 Oct 2026 09:12:00 -0700
+From: Lena Brooks <lena.brooks.acme@gmail.com>
+To: Jordan Ellis <jordan.ellis@riverbenddental.com>
+Subject: ACM-10437 - updated remittance details
+Authentication-Results: mx.riverbenddental.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass header.d=gmail.com; dmarc=pass header.from=gmail.com
+X-BEC-Guard-Demo: try-it-upload
+MIME-Version: 1.0
+Content-Type: text/plain; charset="utf-8"
+
+Hi Jordan,
+
+I am writing from my personal email because our office mail server is down this week.
+
+Our bank account is under review, so please send the payment for invoice ACM-10437
+($18,400.00) to our new account instead:
+
+Bank: Harbor Trust Bank
+Routing: 999000333
+Account: 000077123344
+
+Please process it today by wire and keep this between us until the review is done.
+
+Thank you,
+Lena Brooks
+Account Manager, Acme Supply

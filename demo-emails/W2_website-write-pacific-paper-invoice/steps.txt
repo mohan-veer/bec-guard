@@ -1,0 +1,67 @@
+Try it → "Write an email". Riverbend's records are on the right; look up Pacific Paper Co there:
+contact Mei Chen, orders@pacificpaperco.com, paid by ACH to the account ending 5567, usual invoice $800–$2,000.
+
+Same email three times, changing one thing each time, to see which check catches what.
+
+-------------------------------------------------------------------------------
+Test 1: Pacific Paper's real mailbox is hacked (sender checks pass, the bank account changes)
+
+  Sender name:     Mei Chen
+  Sender address:  orders@pacificpaperco.com
+  Subject:         Invoice PPC-2026-0413
+  How did it arrive?  Passed sender checks
+  Message:
+    Hi Jordan,
+
+    Please find invoice PPC-2026-0413 for $1,380.00 (PO-2026-0124).
+
+    Please note our bank details have changed. Kindly pay this and future invoices by wire to:
+    Bank: Harbor Trust Bank
+    Routing: 999000333
+    Account: 000077123344
+
+    Best,
+    Mei Chen
+    Pacific Paper Co
+
+  Expected: Verify before paying
+    ⚠ New bank account ending 3344; your 4 paid Pacific Paper Co invoices all went to account ending 5567
+    ⚠ Asks to switch from ACH to wire
+    (The sender section has no warnings: it really is Mei's address. That's why sender checks alone fail.)
+
+-------------------------------------------------------------------------------
+Test 2: a lookalike address (change two fields only)
+
+  Sender address:  orders@pacificpaperc0.com      (zero instead of the letter o)
+  How did it arrive?  Failed sender checks
+
+  Expected: Verify before paying
+    ⚠ pacificpaperc0.com imitates pacificpaperco.com
+    ⚠ writes from orders@pacificpaperc0.com, not the address on file (orders@pacificpaperco.com)
+    ⚠ could not confirm the email really came from that address
+    ⚠ plus the same new bank account and ACH → wire as Test 1
+
+-------------------------------------------------------------------------------
+Test 3: the normal invoice (control)
+
+  Sender address:  orders@pacificpaperco.com
+  How did it arrive?  Passed sender checks
+  Message:
+    Hi Jordan,
+
+    Please find invoice PPC-2026-0413 for $1,380.00 (PO-2026-0124), net 30, ACH to the account on file
+    (ending 5567).
+
+    Best,
+    Mei Chen
+    Pacific Paper Co
+
+  Expected: No issues found
+
+-------------------------------------------------------------------------------
+More ideas: change the amount to $9,800 (outside the usual range), add "Please keep this confidential", or start from
+the "Fake CEO, gift cards" example and change the name to another person in the staff list.
+
+Checked in mock mode on 2026-10-29: Test 1 → Verify (bank change), Test 2 → Verify (lookalike domain),
+Test 3 → No issues found. In mock mode a "Couldn't find Pacific Paper Co's official website online" note also shows;
+with the real models the web check uses the saved (simulated) search results instead.
