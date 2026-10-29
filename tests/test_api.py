@@ -132,3 +132,24 @@ def test_mailbox_check_fixture(client, provider):
 
 def test_mailbox_unknown_provider_404(client):
     assert client.post("/api/mailbox/yahoo/check").status_code == 404
+
+
+def test_sample_records_show_the_fictional_company(client):
+    r = client.get("/api/sample-records").json()
+    assert r["org"]["org_name"] == "Riverbend Dental Partners"
+    assert any(p["name"] == "Jordan Ellis" for p in r["org"]["people"])
+    acme = next(v for v in r["vendors"] if v["name"] == "Acme Supply")
+    assert acme["bank_account"]["account_last4"] == "4821"
+    assert acme["past_emails"] and acme["past_invoices"]
+
+
+def test_download_sample_eml(client):
+    resp = client.get("/api/scenarios/02_hacked_vendor_thread/eml")
+    assert resp.status_code == 200
+    assert resp.content == (SCEN / "02_hacked_vendor_thread.eml").read_bytes()
+    assert resp.headers["content-type"].startswith("message/rfc822")
+    assert 'filename="02_hacked_vendor_thread.eml"' in resp.headers["content-disposition"]
+
+
+def test_download_unknown_sample_is_404(client):
+    assert client.get("/api/scenarios/nope/eml").status_code == 404

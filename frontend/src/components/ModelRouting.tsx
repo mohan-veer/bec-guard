@@ -17,9 +17,9 @@ export default function ModelRouting() {
       <button
         type="button"
         onClick={() => dialog.current?.showModal()}
-        className="rounded-md px-3 py-1.5 text-sm font-medium text-slate-600 hover:bg-slate-100 focus-visible:outline-2 focus-visible:outline-indigo-600"
+        className="rounded-md px-3 py-1.5 text-sm font-medium text-slate-600 hover:bg-slate-100 focus-visible:outline-2 focus-visible:outline-blue-600"
       >
-        How it works
+        Models
       </button>
       <dialog
         ref={dialog}
@@ -44,7 +44,7 @@ export default function ModelRouting() {
                 {ROWS.map(([step, model, why]) => (
                   <tr key={step}>
                     <td className="py-2 pr-3">{step}</td>
-                    <td className="py-2 pr-3 font-medium text-indigo-700">{model}</td>
+                    <td className="py-2 pr-3 font-medium text-blue-700">{model}</td>
                     <td className="py-2 text-slate-600">{why}</td>
                   </tr>
                 ))}

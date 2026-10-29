@@ -6,13 +6,13 @@ from functools import lru_cache
 from pathlib import Path
 
 from fastapi import Depends, FastAPI, HTTPException, Request
-from fastapi.responses import StreamingResponse
+from fastapi.responses import Response, StreamingResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 
 from app.config import load_settings, log_modes
 from app.phase_a.card import build_card
-from app.phase_a.data import load_ledger, load_org
+from app.phase_a.data import SAMPLE, load_ledger, load_org, using_profile
 from app.phase_a.models import Email
 from app.phase_a.org import check_lookalike, known_domains
 from app.phase_a.parse import parse_eml
@@ -138,6 +138,19 @@ def list_scenarios():
 @app.get("/api/scenarios/{scenario_id}", response_model=EmailView)
 def get_scenario(scenario_id: str):
     return email_view(parse_eml(_scenario(scenario_id)[1]))
+
+
+@app.get("/api/scenarios/{scenario_id}/eml")
+def download_scenario(scenario_id: str):
+    return Response(_scenario(scenario_id)[1], media_type="message/rfc822",
+                    headers={"content-disposition": f'attachment; filename="{scenario_id}.eml"'})
+
+
+@app.get("/api/sample-records")
+def sample_records():
+    """The sample company's vendor records and staff directory (all fictional), so visitors can write test emails."""
+    with using_profile(SAMPLE):
+        return {"org": load_org().model_dump(), "vendors": [v.model_dump() for v in load_ledger().vendors]}
 
 
 @app.post("/api/scenarios/{scenario_id}/check", dependencies=[Depends(ratelimit.public_check)])

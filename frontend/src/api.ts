@@ -1,4 +1,4 @@
-import type { CheckEvent, MailboxReport, ScenarioItem } from "./types";
+import type { CheckEvent, SampleRecords, ScenarioItem } from "./types";
 
 async function getJson<T>(url: string): Promise<T> {
   const res = await fetch(url);
@@ -8,6 +8,7 @@ async function getJson<T>(url: string): Promise<T> {
 
 export const fetchScenarios = () => getJson<ScenarioItem[]>("/api/scenarios");
 export const fetchHealth = () => getJson<{ llm_mode: string; tavily_mode: string }>("/healthz");
+export const fetchRecords = () => getJson<SampleRecords>("/api/sample-records");
 
 /** POSTs and calls onEvent for each NDJSON line as it arrives (the server streams check progress). */
 export async function streamCheck(
@@ -33,13 +34,4 @@ export async function streamCheck(
     for (const line of lines) if (line.trim()) onEvent(JSON.parse(line) as CheckEvent);
   }
   if (buffer.trim()) onEvent(JSON.parse(buffer) as CheckEvent);
-}
-
-export async function checkMailbox(provider: "outlook" | "gmail"): Promise<MailboxReport> {
-  const res = await fetch(`/api/mailbox/${provider}/check`, { method: "POST" });
-  if (!res.ok) {
-    const detail = await res.json().then((j) => j.detail as string).catch(() => null);
-    throw new Error(detail ?? `Mailbox check failed (${res.status})`);
-  }
-  return res.json() as Promise<MailboxReport>;
 }

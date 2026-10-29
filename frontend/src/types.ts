@@ -81,22 +81,18 @@ export type CheckEvent =
   | { type: "result"; card: Card }
   | { type: "error"; message: string };
 
-export interface MailboxFinding {
-  id: string;
-  kind: "rule" | "forwarding";
-  rule_name: string;
-  severity: "high" | "review";
-  reasons: string[];
-  next_step: string;
-  explanation: string | null;
-}
-
-export interface MailboxReport {
-  provider: "outlook" | "gmail";
-  source: "fixture" | "live";
-  rules_checked: number;
-  rules_disabled: number;
-  findings: MailboxFinding[];
-  limits: string[];
-  notes: string[];
+// GET /api/sample-records (app/phase_a/models.py: VendorLedger, OrgDirectory)
+export interface SampleRecords {
+  org: { org_name: string; domains: string[]; people: { name: string; role: string; email: string; phone: string }[] };
+  vendors: {
+    name: string;
+    domains: string[];
+    official_phone: string;
+    contacts: { name: string; email: string; role: string }[];
+    bank_account: { bank_name: string; account_last4: string };
+    payment_method: string;
+    usual_amount: { min: number | string; max: number | string };
+    past_invoices: { number: string; date: string; amount: number | string; bank_last4: string; method: string; status: string }[];
+    past_emails: { from_addr: string; date: string; subject: string; body: string }[];
+  }[];
 }

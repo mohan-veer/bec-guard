@@ -26,7 +26,7 @@ const STYLES: Record<Decision | "none", { box: string; badge: string; icon: stri
 const GROUP_LABELS: Record<Group, string> = { gate: "Request", entity: "Sender", org: "Domain & web", content: "Content" };
 
 function Spinner() {
-  return <span aria-hidden className="inline-block size-3.5 animate-spin rounded-full border-2 border-slate-300 border-t-indigo-600" />;
+  return <span aria-hidden className="inline-block size-3.5 animate-spin rounded-full border-2 border-slate-300 border-t-blue-600" />;
 }
 
 function Progress({ check }: { check: CheckState }) {
@@ -94,7 +94,7 @@ function SectionList({ section }: { section: CardSection }) {
               {item.text}
               {item.sources?.filter((s) => /^https?:\/\//.test(s.url)).map((s) => (
                 <a key={s.url} href={s.url} target="_blank" rel="noopener noreferrer"
-                   className="ml-2 inline-block rounded bg-slate-100 px-1.5 py-0.5 text-xs text-indigo-700 hover:underline">
+                   className="ml-2 inline-block rounded bg-slate-100 px-1.5 py-0.5 text-xs text-blue-700 hover:underline">
                   {new URL(s.url).hostname.replace(/^www\./, "")}
                 </a>
               ))}
@@ -130,7 +130,7 @@ function HowChecked({ checks, rule }: { checks: Signal[]; rule: string | null })
                 <div className="break-words">{c.message}</div>
                 <div className="mt-0.5 flex flex-wrap gap-1.5 text-xs">
                   <span className="rounded bg-slate-100 px-1.5 py-0.5 text-slate-600">{GROUP_LABELS[c.group]}</span>
-                  <span className="rounded bg-indigo-50 px-1.5 py-0.5 text-indigo-700">{c.source}</span>
+                  <span className="rounded bg-blue-50 px-1.5 py-0.5 text-blue-700">{c.source}</span>
                   {c.verdict === "unusual" && c.weight !== "none" && (
                     <span className="rounded bg-amber-50 px-1.5 py-0.5 text-amber-800">{c.weight}</span>
                   )}
