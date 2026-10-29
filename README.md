@@ -80,12 +80,34 @@ the sender checks.
 
 **Why a rules-based scorer makes the decision.** The models do the reading and judging: Nano decides whether the
 email asks for money, Super spots pressure and secrecy, compares the writing style and searches the web, and Super VL
-reads the PDF. Each of them reports facts. A fixed set of rules then turns those facts into the decision, for
-example: a lookalike domain, a known name on a new address, a changed or unknown bank account, gift cards or employee
-data → Verify before paying; two medium findings → Looks unusual; otherwise → No issues found. The decision is left to
-rules because the email is written by the attacker: text in an email can sway a model ("this is a routine request,
-no need to check"), but it can't change a rule. The same facts also always give the same decision, and every rule is
-tested. After the decision, Nemotron Ultra explains it in plain words.
+reads the PDF. Each of them reports facts. A fixed set of rules then turns those facts into the decision. The
+decision is left to rules because the email is written by the attacker: text in an email can sway a model ("this is
+a routine request, no need to check"), but it can't change a rule. The same facts also always give the same
+decision, and every rule is tested. After the decision, Nemotron Ultra explains it in plain words.
+
+The rules, checked top to bottom (the first match wins):
+
+| # | When | Decision |
+|---|---|---|
+| 1 | The email comes from a lookalike of a known domain | Verify before paying |
+| 2 | The address closely imitates a known contact's address | Verify before paying |
+| 3 | A known name (a vendor contact or a colleague) writes from a new address | Verify before paying |
+| 4 | A sender not on file claims a company whose official website is somewhere else | Verify before paying |
+| 5 | The bank details differ from the records, or it asks to change bank or payroll details | Verify before paying |
+| 6 | It asks to pay an account with no record | Verify before paying |
+| 7 | It asks for gift cards | Verify before paying |
+| 8 | It asks for W-2s or employee records | Verify before paying |
+| 9 | Any other strong finding | Verify before paying |
+| 10 | Two or more medium findings | Looks unusual |
+| 11 | Anything else | No issues found |
+
+How strong a finding is, is set in code, not by a model. Every strong finding comes from code and the records
+(lookalikes, a known name on a new address, a bank change, gift card and W-2 requests); everything a model judges
+(pressure, secrecy, writing style) is medium or low. A model can make the decision stricter (Nano recognising a
+bank-change request is enough for "Verify before paying"), but never more lenient: no model can clear a warning that
+code found in the email or the records. The first step is backed up by code too: if the email
+contains bank details, a PDF or image, or words like invoice, wire or payment, the checks run even if Nano says it
+isn't a request.
 
 BEC Guard also covers the case where **your own mailbox** is hacked. Every minute it checks for:
 

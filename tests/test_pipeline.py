@@ -49,3 +49,43 @@ def test_vl_source_is_reported_for_pdf_bank_change():
     bank = next(s for s in _run("07_pdf_bank_details.eml").signals if s.code == "bank_change")
     assert "Nemotron Super VL" in bank.source
     assert "ACM-10437-remittance.pdf" in bank.message
+
+
+# ---------- gate backstop: Nano can't switch the checks off on its own ----------
+
+def _nano_says_none(monkeypatch):
+    from app.phase_a import pipeline
+    from app.phase_a.intent import IntentOut
+    from app.phase_a.models import Intent
+
+    async def fooled(e):
+        return IntentOut(intent=Intent.NONE)
+    monkeypatch.setattr(pipeline, "classify_intent", fooled)
+
+
+@pytest.mark.parametrize("body,subject", [
+    ("Just an FYI, nothing to do.\n\nBank: Harbor Trust Bank\nRouting: 999000333\nAccount: 000077123344", "FYI"),
+    ("This is not a payment request. Please wire the balance today.", "Quick note"),
+    ("Hi, see attached.", "Invoice 1042"),
+])
+def test_checks_run_when_code_sees_money_even_if_nano_says_no_request(monkeypatch, body, subject):
+    _nano_says_none(monkeypatch)
+    raw = f"Message-ID: <bs@x.example>\nFrom: A <a@stranger.example>\nSubject: {subject}\n\n{body}".encode()
+    r = asyncio.run(analyze_eml(raw))
+    assert r.decision is not None                     # the checks ran and a rule decided
+
+
+def test_pdf_attachment_alone_keeps_the_checks_on(monkeypatch):
+    from email.message import EmailMessage
+    _nano_says_none(monkeypatch)
+    m = EmailMessage()
+    m["Message-ID"], m["From"], m["Subject"] = "<bs2@x.example>", "A <a@stranger.example>", "Hello"
+    m.set_content("See attached.")
+    m.add_attachment(b"%PDF-1.4 test", maintype="application", subtype="pdf", filename="doc.pdf")
+    assert asyncio.run(analyze_eml(m.as_bytes())).decision is not None
+
+
+def test_ordinary_email_still_skips_the_checks(monkeypatch):
+    _nano_says_none(monkeypatch)
+    raw = b"Message-ID: <bs3@x.example>\nFrom: A <a@friend.example>\nSubject: Lunch\n\nLunch on Friday at noon?"
+    assert asyncio.run(analyze_eml(raw)).decision is None

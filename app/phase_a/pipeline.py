@@ -14,7 +14,7 @@ from app.phase_a.content import (check_language, check_request_keywords, check_s
                                  same_company, vendor_by_name)
 from app.phase_a.data import load_ledger, load_org
 from app.phase_a.entity import FREE_EMAIL_DOMAINS, check_entity
-from app.phase_a.intent import IntentOut, classify_intent
+from app.phase_a.intent import IntentOut, classify_intent, needs_checks
 from app.phase_a.models import AnalysisResult, Decision, Email, Intent, Person, Signal, Vendor
 from app.phase_a.org import (callback_from_directory, check_domain_age, check_email_phones, check_lookalike,
                              check_web_consensus, known_domains, records_callback)
@@ -145,6 +145,8 @@ async def analyze_events(e: Email) -> AsyncIterator[dict]:
     """Yields {"type": "gate" | "signals" | "early" | "result", ...}; the last event carries the AnalysisResult."""
     gate = await classify_intent(e)
     intent = gate.intent
+    if intent == Intent.NONE and needs_checks(e):  # Nano alone can't switch the checks off
+        intent = Intent.PAYMENT_REQUEST
     gate_sig = Signal(code="intent", group="gate", verdict="info", source="Nemotron Nano",
                       message=f"Request type: {intent.value.replace('_', ' ')}")
     yield {"type": "gate", "intent": intent.value, "claimed_company": gate.claimed_company}
