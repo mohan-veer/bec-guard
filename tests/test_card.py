@@ -155,3 +155,19 @@ def test_only_warnings_and_notes_are_sent_for_rewording(monkeypatch):
          Signal(code="known_sender", group="entity", verdict="fine", source="r", message="FINE LINE")]
     asyncio.run(card_mod.word_signals(s, "k"))
     assert "WARN LINE" in sent["lines"] and "FINE LINE" not in sent["lines"]
+
+
+def test_new_payee_card_asks_to_confirm_without_calling_the_email_fake():
+    """Prevention, not accusation: only the new account is a warning; the opening line doesn't say "not genuine"."""
+    e = parse_eml(b"Message-ID: <x@a.com>\nFrom: A <a@newvendor.com>\n\nPlease pay invoice 1 to account 000012345678")
+    r = AnalysisResult(message_id="x", intent=Intent.PAYMENT_REQUEST, decision=Decision.VERIFY_BEFORE_PAYING,
+                       rule="new_payee", signals=[
+                           Signal(code="new_payee_account", group="content", verdict="unusual", weight="medium",
+                                  message="Asks for payment to a bank account you have no record of", source="rules"),
+                           Signal(code="email_auth_pass", group="entity", verdict="fine", weight="none",
+                                  message="Passed sender checks", source="rules")])
+    c = build_card(r, e)
+    assert c.headline == "Verify before paying"
+    assert "genuine" not in c.intro and "account" in c.intro
+    warns = [i.text for s in c.sections for i in s.items if i.tone == "warn"]
+    assert warns == ["Asks for payment to a bank account you have no record of"]

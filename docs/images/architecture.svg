@@ -1,0 +1,61 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 980 560" width="980" height="560" font-family="-apple-system, 'Segoe UI', Helvetica, Arial, sans-serif">
+  <defs>
+    <marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10z" fill="#2563eb"/></marker>
+  </defs>
+  <rect width="980" height="560" rx="16" fill="#ffffff"/>
+  <text x="20" y="36" font-size="20" font-weight="700" fill="#0f172a">How BEC Guard runs</text>
+  <text x="20" y="58" font-size="13" fill="#64748b">The Gmail add-on sends new mail and mailbox changes to the BEC Guard API; every model call goes to Nebius Token Factory.</text>
+
+  <!-- Gmail -->
+  <rect x="20" y="80" width="250" height="460" rx="14" fill="#f8fafc" stroke="#cbd5e1" stroke-width="1.5"/>
+  <text x="36" y="104" font-size="12" font-weight="700" fill="#64748b" letter-spacing="1">GMAIL · THE ORGANIZATION</text>
+  <rect x="36" y="118" width="218" height="70" rx="10" fill="#ffffff" stroke="#93c5fd" stroke-width="1.5"/>
+  <text x="50" y="142" font-size="14" font-weight="700" fill="#0f172a">BEC Guard add-on</text>
+  <text x="50" y="162" font-size="12" fill="#475569">Apps Script, in the Gmail sidebar</text>
+  <text x="50" y="178" font-size="12" fill="#475569">card · labels · banner</text>
+  <rect x="36" y="204" width="218" height="104" rx="10" fill="#ffffff" stroke="#93c5fd" stroke-width="1.5"/>
+  <text x="50" y="228" font-size="14" font-weight="700" fill="#0f172a">Every minute</text>
+  <g font-size="12" fill="#475569"><text x="50" y="250">New mail: inbox, spam, filed</text><text x="50" y="268">Filters, forwarding, send-as</text><text x="50" y="286">Sent and deleted mail</text></g>
+  <rect x="36" y="324" width="218" height="88" rx="10" fill="#ffffff" stroke="#93c5fd" stroke-width="1.5"/>
+  <text x="50" y="348" font-size="14" font-weight="700" fill="#0f172a">What the user sees</text>
+  <g font-size="12" fill="#475569"><text x="50" y="370">Card next to the email</text><text x="50" y="388">Red label on risky mail</text><text x="50" y="404">Takeover banner</text></g>
+  <rect x="36" y="428" width="218" height="96" rx="10" fill="#fef2f2" stroke="#fca5a5" stroke-width="1.5"/>
+  <text x="50" y="452" font-size="14" font-weight="700" fill="#7f1d1d">Compliance team</text>
+  <g font-size="12" fill="#7f1d1d"><text x="50" y="474">One email per takeover event</text><text x="50" y="492">to the contact on the server,</text><text x="50" y="508">which the mailbox can't change</text></g>
+
+  <!-- API -->
+  <rect x="320" y="80" width="330" height="460" rx="14" fill="#eff6ff" stroke="#93c5fd" stroke-width="1.5"/>
+  <rect x="320" y="80" width="330" height="40" rx="14" fill="#1e3a8a"/><rect x="320" y="106" width="330" height="14" fill="#1e3a8a"/>
+  <text x="485" y="106" font-size="15" font-weight="700" fill="#ffffff" text-anchor="middle">BEC Guard API (FastAPI)</text>
+  <rect x="336" y="134" width="298" height="168" rx="10" fill="#ffffff" stroke="#93c5fd" stroke-width="1.5"/>
+  <text x="350" y="158" font-size="14" font-weight="700" fill="#0f172a">Email check</text>
+  <g font-size="12.5" fill="#334155"><text x="350" y="182">1 · Nano: money or data request?</text><text x="350" y="204">2 · Rules + Super agent + Super VL,</text><text x="350" y="222">     in parallel: sender, company, request</text><text x="350" y="244">3 · Rules-based scorer decides</text><text x="350" y="266">4 · Ultra words the card; code checks</text><text x="350" y="284">     every address and number</text></g>
+  <rect x="336" y="316" width="298" height="126" rx="10" fill="#ffffff" stroke="#93c5fd" stroke-width="1.5"/>
+  <text x="350" y="340" font-size="14" font-weight="700" fill="#0f172a">Mailbox takeover checks</text>
+  <g font-size="12.5" fill="#334155"><text x="350" y="362">New filters, forwarding, send-as, POP</text><text x="350" y="382">Bank details sent outside; writing style</text><text x="350" y="402">Sent mail deleted soon after sending</text><text x="350" y="422">Outside office hours: raised to high</text></g>
+  <rect x="336" y="456" width="298" height="68" rx="10" fill="#ffffff" stroke="#93c5fd" stroke-width="1.5"/>
+  <text x="350" y="480" font-size="14" font-weight="700" fill="#0f172a">Integration API · /api/v1</text>
+  <text x="350" y="500" font-size="12.5" fill="#334155">One key per company; rate limits and a</text>
+  <text x="350" y="516" font-size="12.5" fill="#334155">daily budget on model spend</text>
+
+  <!-- Services -->
+  <rect x="700" y="80" width="260" height="150" rx="14" fill="#dbeafe" stroke="#2563eb" stroke-width="2"/>
+  <text x="716" y="106" font-size="15" font-weight="700" fill="#1e3a8a">Nebius Token Factory</text>
+  <g font-size="12.5" fill="#1e3a8a"><text x="716" y="132">Nemotron 3 Nano · every email</text><text x="716" y="154">Nemotron 3 Super · agent, judgement</text><text x="716" y="176">Nemotron 3.5 Super VL · PDFs</text><text x="716" y="198">Nemotron 3 Ultra · the card's words</text><text x="716" y="218" font-size="11.5" fill="#1e40af">one OpenAI-compatible endpoint</text></g>
+  <rect x="700" y="248" width="260" height="104" rx="14" fill="#ffffff" stroke="#93c5fd" stroke-width="1.5"/>
+  <text x="716" y="274" font-size="15" font-weight="700" fill="#0f172a">Web lookups</text>
+  <g font-size="12.5" fill="#334155"><text x="716" y="298">Tavily search (the agent's tool)</text><text x="716" y="318">RDAP: when a domain was created</text><text x="716" y="338">dnstwist: lookalike domains</text></g>
+  <rect x="700" y="370" width="260" height="170" rx="14" fill="#ffffff" stroke="#93c5fd" stroke-width="1.5"/>
+  <text x="716" y="396" font-size="15" font-weight="700" fill="#0f172a">Company records</text>
+  <g font-size="12.5" fill="#334155"><text x="716" y="420">Vendors: contacts, bank account</text><text x="716" y="438">on file, invoices, usual amounts</text><text x="716" y="460">Staff directory and phone numbers</text><text x="716" y="482">Compliance contact, office hours</text><text x="716" y="508" font-size="11.5" fill="#64748b">Server files today; the accounting</text><text x="716" y="524" font-size="11.5" fill="#64748b">system in production</text></g>
+
+  <!-- flows -->
+  <line x1="254" y1="256" x2="332" y2="230" stroke="#2563eb" stroke-width="2" marker-end="url(#a)"/>
+  <line x1="254" y1="270" x2="332" y2="360" stroke="#2563eb" stroke-width="2" marker-end="url(#a)"/>
+  <line x1="336" y1="290" x2="258" y2="360" stroke="#2563eb" stroke-width="2" stroke-dasharray="6 4" marker-end="url(#a)"/>
+  <line x1="336" y1="420" x2="258" y2="470" stroke="#dc2626" stroke-width="2" stroke-dasharray="6 4" marker-end="url(#a)"/>
+  <line x1="634" y1="170" x2="696" y2="150" stroke="#2563eb" stroke-width="2" marker-end="url(#a)"/>
+  <line x1="634" y1="230" x2="696" y2="290" stroke="#2563eb" stroke-width="2" marker-end="url(#a)"/>
+  <line x1="696" y1="440" x2="638" y2="400" stroke="#2563eb" stroke-width="2" marker-end="url(#a)"/>
+  <line x1="696" y1="455" x2="638" y2="270" stroke="#2563eb" stroke-width="2" marker-end="url(#a)"/>
+</svg>

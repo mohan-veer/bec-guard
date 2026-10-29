@@ -291,7 +291,7 @@ def _invoice_lines(number, date, amount, po, bank, routing, account, method):
 
 
 LIVE_EMAILS = [
-    ("Control", SAM[1], "Invoice ACM-10438",
+    ("C1_normal-invoice", SAM[1], "Invoice ACM-10438",
      "Hi Jordan,\n\nAttached is invoice ACM-10438 for PO-2026-0125: $17,200.00, net 30. ACH to the usual account "
      "is fine.\n\nThanks,\nSam Ortiz\nAccounts Receivable, Acme Supply",
      "ACM-10438.pdf",
@@ -300,7 +300,7 @@ LIVE_EMAILS = [
       "Description: Clinical and office supplies (monthly order)", "Amount due: $17,200.00", "Terms: Net 30",
       f"Pay by ACH to the account on file: {ACME_BANK['bank_name']}, account ending {ACME_BANK['account_last4']}"],
      "No label. Sidebar: \"No issues found\" + what checked out."),
-    ("B1", SAM[1], "Re: Invoice ACM-10437",
+    ("B1_hacked-vendor-changes-bank", SAM[1], "Re: Invoice ACM-10437",
      "Hi Jordan,\n\nQuick update: we moved our banking. Please use our new account for ACM-10437 ($18,400.00):\n\n"
      "Bank: Pacific Crest Bank\nRouting: 999000222\nAccount: 000058127731\n\nThe updated invoice is attached. "
      "Please process today, by wire.\n\nThanks,\nSam",
@@ -308,14 +308,14 @@ LIVE_EMAILS = [
      _invoice_lines("ACM-10437", "2026-10-01", 18400.00, "PO-2026-0118", "Pacific Crest Bank", "999000222",
                     "000058127731", "Wire transfer"),
      "Red label. Sender checks PASS (real account); new account ending 7731 (on file 4821), ACH -> wire."),
-    ("B1b-pdf-only", SAM[1], "Re: Invoice ACM-10437",
+    ("B1b_hacked-vendor-bank-in-pdf", SAM[1], "Re: Invoice ACM-10437",
      "Hi Jordan,\n\nPlease see the attached updated remittance details for ACM-10437 and use them for this "
      "payment.\n\nThanks,\nSam",
      "ACM-10437-remittance.pdf",
      _invoice_lines("ACM-10437", "2026-10-01", 18400.00, "PO-2026-0118", "Pacific Crest Bank", "999000222",
                     "000058127731", "Wire transfer"),
      "REAL MODELS ONLY (Nemotron Super VL reads the PDF). Red label: new account ending 7731 found in the PDF."),
-    ("A1", "testvendor.26@outlook.com (display name: Sam Ortiz)", "Invoice ACM-10437 - urgent",
+    ("A1_fake-vendor-new-bank-account", "testvendor.26@outlook.com (display name: Sam Ortiz)", "Invoice ACM-10437 - urgent",
      "Hi Jordan,\n\nOur bank flagged the ACH for ACM-10437. Please send the $18,400.00 today by wire to our new "
      "account:\n\nBank: Lakeshore Commerce Bank\nRouting: 999000666\nAccount: 000044019055\n\nCorrected invoice "
      "attached.\n\nThanks,\nSam",
@@ -328,7 +328,7 @@ LIVE_EMAILS = [
 
 
 LIVE_EMAILS.append(
-    ("A3-unknown-company", "testvendor.26@outlook.com (display name: Henry Schein Billing)",
+    ("A3_stranger-claims-known-supplier", "testvendor.26@outlook.com (display name: Henry Schein Billing)",
      "New supplier account: Henry Schein",
      "Hi Jordan,\n\nWe're Henry Schein, your new supplier for dental consumables. Please pay the attached invoice "
      "HS-55120 ($6,480.00) within 3 days to activate your account:\n\nBank: Lakeshore Commerce Bank\n"
@@ -343,6 +343,25 @@ LIVE_EMAILS.append(
      "outlook.com; call-back number from henryschein.com; the (206) number in the email isn't Henry Schein's; "
      "sender not in your records; address also resembles Sam Ortiz's (Acme) - supporting fact only."))
 
+
+# A4: same attack as A3 with a made-up supplier (no real company's name), safe to show in the video.
+LIVE_EMAILS.append(
+    ("A4_stranger-claims-new-supplier", "testvendor.26@outlook.com (display name: Quillbrook Dental Supply Billing)",
+     "Welcome to Quillbrook Dental Supply - first invoice QDS-30418",
+     "Hi Jordan,\n\nThank you for choosing Quillbrook Dental Supply as your new supplier for impression materials and "
+     "sterilization pouches. As agreed with your office manager, please pay the attached first invoice QDS-30418 "
+     "($4,950.00) by Friday to activate your account and keep the opening discount:\n\nBank: Lakeshore Commerce Bank\n"
+     "Routing: 999000666\nAccount: 000044019055\n\nQuestions? Call our billing desk at (206) 555-0188.\n\n"
+     "Best regards,\nKaren Mills\nBilling, Quillbrook Dental Supply",
+     "QDS-30418.pdf",
+     ["QUILLBROOK DENTAL SUPPLY - INVOICE (TEST DOCUMENT, FICTIONAL COMPANY)", "Invoice number: QDS-30418",
+      "Invoice date: 2026-10-29", f"Bill to: {ORG_NAME}", "Description: Opening order - impression materials, "
+      "sterilization pouches", "Amount due: $4,950.00", "Terms: Due Friday", "Payment method: Wire transfer",
+      "Bank: Lakeshore Commerce Bank", "Routing number: 999000666", "Account number: 000044019055",
+      "Billing desk: (206) 555-0188"],
+     "Red label. Verify before paying (rule: new payee). Says Quillbrook but writes from outlook.com, free Outlook "
+     "address, not in your records, not one of your vendors, no official website found, payment to an account with "
+     "no record (ending 9055, read from the PDF)."))
 
 def write_live_emails() -> None:
     for folder, sender, subject, body, pdf_name, pdf_lines, expected in LIVE_EMAILS:

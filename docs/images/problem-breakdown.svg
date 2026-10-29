@@ -1,0 +1,79 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 700" width="960" height="700" font-family="-apple-system, 'Segoe UI', Helvetica, Arial, sans-serif">
+  <rect width="960" height="700" rx="16" fill="#ffffff"/>
+  <text x="20" y="36" font-size="20" font-weight="700" fill="#0f172a">BEC splits into three ways of getting a trusted voice</text>
+  <text x="20" y="58" font-size="13" fill="#64748b">Pretend, break in, or add a second channel. Every branch ends in the same few asks.</text>
+
+  <rect x="360" y="76" width="240" height="46" rx="10" fill="#ffffff" stroke="#94a3b8" stroke-width="1.5"/>
+  <text x="480" y="105" font-size="16" font-weight="700" fill="#0f172a" text-anchor="middle">Business Email Compromise</text>
+  <path d="M480 122 V142 M165 142 H795 M165 142 V162 M480 142 V162 M795 142 V162" stroke="#94a3b8" stroke-width="1.5" fill="none"/>
+
+  <!-- A. Fake -->
+  <rect x="20" y="162" width="290" height="56" rx="10" fill="#eff6ff" stroke="#2563eb" stroke-width="2"/>
+  <text x="36" y="186" font-size="16" font-weight="700" fill="#1e3a8a">A. Fake</text>
+  <text x="36" y="206" font-size="13" fill="#1e40af">Nothing hacked, only pretended</text>
+  <path d="M30 218 V286 M30 286 H40 M30 398 H40 M30 218 V510 M30 510 H40" stroke="#2563eb" stroke-width="1.5" fill="none"/>
+  <rect x="40" y="238" width="270" height="96" rx="10" fill="#ffffff" stroke="#93c5fd" stroke-width="1.5"/>
+  <text x="56" y="262" font-size="14" font-weight="700" fill="#0f172a">A1 · Fake address</text>
+  <rect x="210" y="246" width="90" height="22" rx="11" fill="#2563eb"/><text x="255" y="261" font-size="11" font-weight="700" fill="#fff" text-anchor="middle">✓ BEC Guard</text>
+  <text x="56" y="284" font-size="12.5" fill="#475569">Lookalike domain (acrne.com)</text>
+  <text x="56" y="302" font-size="12.5" fill="#475569">Spoofed sender domain</text>
+  <text x="56" y="320" font-size="12.5" fill="#475569">Free email (Gmail)</text>
+  <rect x="40" y="350" width="270" height="96" rx="10" fill="#ffffff" stroke="#93c5fd" stroke-width="1.5"/>
+  <text x="56" y="374" font-size="14" font-weight="700" fill="#0f172a">A2 · Fake identity</text>
+  <rect x="210" y="358" width="90" height="22" rx="11" fill="#2563eb"/><text x="255" y="373" font-size="11" font-weight="700" fill="#fff" text-anchor="middle">✓ BEC Guard</text>
+  <text x="56" y="396" font-size="12.5" fill="#475569">Boss or CEO</text>
+  <text x="56" y="414" font-size="12.5" fill="#475569">Billing or HR colleague</text>
+  <text x="56" y="432" font-size="12.5" fill="#475569">Vendor, lawyer, title company</text>
+  <rect x="40" y="462" width="270" height="96" rx="10" fill="#ffffff" stroke="#93c5fd" stroke-width="1.5"/>
+  <text x="56" y="486" font-size="14" font-weight="700" fill="#0f172a">A3 · Fake company</text>
+  <rect x="210" y="470" width="90" height="22" rx="11" fill="#2563eb"/><text x="255" y="485" font-size="11" font-weight="700" fill="#fff" text-anchor="middle">✓ BEC Guard</text>
+  <text x="56" y="508" font-size="12.5" fill="#475569">Copies a real company's name</text>
+  <text x="56" y="526" font-size="12.5" fill="#475569">Real account in a fake name</text>
+
+  <!-- B. Hack -->
+  <rect x="335" y="162" width="290" height="56" rx="10" fill="#fef2f2" stroke="#dc2626" stroke-width="2"/>
+  <text x="351" y="186" font-size="16" font-weight="700" fill="#7f1d1d">B. Hack</text>
+  <text x="351" y="206" font-size="13" fill="#991b1b">A real account or device taken</text>
+  <path d="M345 218 V510 M345 286 H355 M345 398 H355 M345 510 H355" stroke="#dc2626" stroke-width="1.5" fill="none"/>
+  <rect x="355" y="238" width="270" height="96" rx="10" fill="#ffffff" stroke="#fca5a5" stroke-width="1.5"/>
+  <text x="371" y="262" font-size="14" font-weight="700" fill="#0f172a">B1 · Email hacked</text>
+  <rect x="525" y="246" width="90" height="22" rx="11" fill="#2563eb"/><text x="570" y="261" font-size="11" font-weight="700" fill="#fff" text-anchor="middle">✓ BEC Guard</text>
+  <text x="371" y="284" font-size="12.5" fill="#475569">The vendor's mailbox</text>
+  <text x="371" y="302" font-size="12.5" fill="#475569">A colleague's, the CEO's, or yours</text>
+  <text x="371" y="320" font-size="12.5" fill="#475569">Via password phishing</text>
+  <rect x="355" y="350" width="270" height="96" rx="10" fill="#ffffff" stroke="#fca5a5" stroke-width="1.5"/>
+  <text x="371" y="374" font-size="14" font-weight="700" fill="#0f172a">B2 · Malware on a PC</text>
+  <rect x="515" y="358" width="100" height="22" rx="11" fill="#e2e8f0"/><text x="565" y="373" font-size="11" font-weight="700" fill="#475569" text-anchor="middle">Antivirus' job</text>
+  <text x="371" y="396" font-size="12.5" fill="#475569">Infostealer: leads to B1</text>
+  <text x="371" y="414" font-size="12.5" fill="#475569">Banking trojan: bank logins</text>
+  <text x="371" y="432" font-size="12.5" fill="#475569">Keylogger: watches billing</text>
+  <rect x="355" y="462" width="270" height="96" rx="10" fill="#ffffff" stroke="#fca5a5" stroke-width="1.5"/>
+  <text x="371" y="486" font-size="14" font-weight="700" fill="#0f172a">B3 · Other systems</text>
+  <text x="371" y="508" font-size="12.5" fill="#475569">Payroll portal login</text>
+  <text x="371" y="526" font-size="12.5" fill="#475569">Vendor or accounting portal</text>
+
+  <!-- C. Escalation -->
+  <rect x="650" y="162" width="290" height="56" rx="10" fill="#ecfdf5" stroke="#059669" stroke-width="2"/>
+  <text x="666" y="186" font-size="16" font-weight="700" fill="#064e3b">C. Escalation</text>
+  <text x="666" y="206" font-size="13" fill="#065f46">Another channel seals the deal</text>
+  <path d="M660 218 V286 M660 286 H670" stroke="#059669" stroke-width="1.5" fill="none"/>
+  <rect x="670" y="238" width="270" height="96" rx="10" fill="#ffffff" stroke="#6ee7b7" stroke-width="1.5"/>
+  <text x="686" y="262" font-size="14" font-weight="700" fill="#0f172a">C1 · Follow-up channel</text>
+  <text x="686" y="284" font-size="12.5" fill="#475569">Voice-clone phone call</text>
+  <text x="686" y="302" font-size="12.5" fill="#475569">Deepfake video meeting</text>
+  <text x="686" y="320" font-size="12.5" fill="#475569">Text or WhatsApp pressure</text>
+  <path d="M805 334 V578" stroke="#94a3b8" stroke-width="1.5" stroke-dasharray="5 5"/>
+  <path d="M175 558 V578 M490 558 V578" stroke="#94a3b8" stroke-width="1.5" stroke-dasharray="5 5"/>
+
+  <!-- the five asks -->
+  <rect x="20" y="578" width="920" height="84" rx="12" fill="#f1f5f9" stroke="#cbd5e1" stroke-width="1.5"/>
+  <text x="40" y="602" font-size="14" font-weight="700" fill="#0f172a">Every branch ends in one of five asks</text>
+  <g font-size="13" fill="#0f172a" text-anchor="middle">
+    <rect x="40" y="616" width="160" height="32" rx="16" fill="#ffffff" stroke="#94a3b8"/><text x="120" y="637">Bank change</text>
+    <rect x="220" y="616" width="160" height="32" rx="16" fill="#ffffff" stroke="#94a3b8"/><text x="300" y="637">Fake invoice / wire</text>
+    <rect x="400" y="616" width="160" height="32" rx="16" fill="#ffffff" stroke="#94a3b8"/><text x="480" y="637">Gift cards</text>
+    <rect x="580" y="616" width="160" height="32" rx="16" fill="#ffffff" stroke="#94a3b8"/><text x="660" y="637">Payroll change</text>
+    <rect x="760" y="616" width="160" height="32" rx="16" fill="#ffffff" stroke="#94a3b8"/><text x="840" y="637">Data theft</text>
+  </g>
+  <text x="20" y="686" font-size="12" fill="#64748b">✓ BEC Guard: covered by this project. Escalation (C) usually starts with A or B, which are covered.</text>
+</svg>

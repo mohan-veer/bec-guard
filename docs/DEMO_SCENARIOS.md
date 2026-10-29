@@ -78,7 +78,7 @@ checks are always shown in the sample inbox on the website.
 **A3. A stranger claims to be a real, well-known supplier** — from `testvendor.26@outlook.com`, display name
 "Henry Schein Billing", asking to pay invoice HS-55120 ($6,480) within 3 days, with the scammer's own phone in the
 signature. Uses a real company's name only in this private test sent to our own account (the call-back number shown
-comes from that company's public website). Files: `demo-emails/A3-unknown-company/`.
+comes from that company's public website). Files: `demo-emails/A3_stranger-claims-known-supplier/`.
 
 | Check | Result |
 |---|---|
@@ -92,6 +92,11 @@ comes from that company's public website). Files: `demo-emails/A3-unknown-compan
 Phone numbers on the card always come from a trusted source with its name attached: your vendor records, your
 staff directory, or the company's official website found by the agent. A number written in the email is never
 offered; it is compared with the trusted ones.
+
+**A4. A stranger claims to be a new supplier (made-up company, safe for the video)** — same as A3, but "Quillbrook
+Dental Supply" (fictional; the web search finds no real company by that name) sends its "first invoice" QDS-30418
+($4,950, PDF) to an account with no record. Expected: 🔴 **Verify before paying** (rule `new_payee`: any payment to a
+bank account with no record is confirmed before the first payment). Files: `demo-emails/A4_stranger-claims-new-supplier/`.
 
 ### Scenario B: an account is hacked
 
@@ -126,7 +131,7 @@ every BEC Guard card ("This was me" clears it), and serious warnings are emailed
 (`test.vendor26@yahoo.com`) "our remittance details have been updated" with new bank details, then delete it from Sent.
 Expected within ~1 minute: banner "Your mailbox may be in someone else's hands" (bank details sent outside; deleted
 soon after sending; writing style unlike Jordan's) and one or two emails to the compliance contact.
-Files: `demo-emails/B2-hidden-filter/steps.txt` (the filter) and `demo-emails/B2b-intruder-sends/email.txt`.
+Files: `demo-emails/B2_hidden-inbox-filter/steps.txt` (the filter) and `demo-emails/B2b_intruder-sends-bank-details/email.txt`.
 
 ### Control: a normal invoice
 

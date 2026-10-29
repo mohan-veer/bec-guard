@@ -26,6 +26,12 @@ def sig(code, weight="medium", verdict="unusual"):
     (Intent.PAYMENT_REQUEST, [sig("first_contact", "low"), sig("no_dmarc", "low"), sig("po_missing", "low")], N, "default"),
     (Intent.PAYMENT_REQUEST, [sig("dmarc_fail"), sig("reply_to_mismatch", verdict="fine")], N, "default"),
     (Intent.DATA_REQUEST, [], N, "default"),  # a data request that isn't W-2/employee records
+    # prevention first: paying an account with no record is always verified, even when nothing else is wrong
+    (Intent.PAYMENT_REQUEST, [sig("new_payee_account")], V, "new_payee"),
+    (Intent.PAYMENT_REQUEST, [sig("new_payee_account"), sig("known_sender", verdict="fine")], V, "new_payee"),
+    (Intent.PAYMENT_REQUEST, [sig("new_payee_account", verdict="fine")], N, "default"),
+    # impersonation still names the headline when it is also present
+    (Intent.PAYMENT_REQUEST, [sig("new_payee_account"), sig("lookalike_domain", "strong")], V, "lookalike_domain"),
 ])
 def test_rules(intent, signals, decision, rule):
     r = score(intent, signals)

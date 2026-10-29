@@ -26,6 +26,7 @@ from app.phase_a.scorer import score
 EARLY_REASONS = {
     "bank_change": "This email asks to change bank or payment details.",
     "gift_cards": "This email asks for gift cards.",
+    "new_payee": "This email asks for payment to a bank account you have no record of.",
 }
 
 

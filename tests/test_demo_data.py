@@ -119,7 +119,7 @@ def test_history_is_marked_as_seeded(built):
 def test_live_email_pdfs_match_their_story():
     by = {e[0]: e for e in demo.LIVE_EMAILS}
     text = lambda name: "\n".join(demo.make_pdf(by[name][5]).decode("latin-1").split("\n"))  # noqa: E731
-    assert "account ending 4821" in text("Control")                 # happy path: account on file
-    assert "000058127731" in text("B1") and "000058127731" in by["B1"][3]   # body and PDF agree
-    assert "000058127731" not in by["B1b-pdf-only"][3]                # new account ONLY in the PDF
-    assert "000044019055" in text("A1") and "Lakeshore" in by["A1"][3]
+    assert "account ending 4821" in text("C1_normal-invoice")                 # happy path: account on file
+    assert "000058127731" in text("B1_hacked-vendor-changes-bank") and "000058127731" in by["B1_hacked-vendor-changes-bank"][3]   # body and PDF agree
+    assert "000058127731" not in by["B1b_hacked-vendor-bank-in-pdf"][3]                # new account ONLY in the PDF
+    assert "000044019055" in text("A1_fake-vendor-new-bank-account") and "Lakeshore" in by["A1_fake-vendor-new-bank-account"][3]

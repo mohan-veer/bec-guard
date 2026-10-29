@@ -1,0 +1,45 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 650" width="960" height="650" font-family="-apple-system, 'Segoe UI', Helvetica, Arial, sans-serif">
+  <defs>
+    <marker id="a" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0 L10 5 L0 10z" fill="#64748b"/></marker>
+  </defs>
+  <rect width="960" height="650" rx="16" fill="#ffffff"/>
+  <text x="20" y="36" font-size="20" font-weight="700" fill="#0f172a">Every money or data request gets three checks before the user sees a result</text>
+  <text x="20" y="58" font-size="13" fill="#64748b">The checks run in parallel. A definite fake warns early; a pass never skips the content check.</text>
+
+  <rect x="380" y="76" width="200" height="44" rx="10" fill="#ffffff" stroke="#94a3b8" stroke-width="1.5"/>
+  <text x="480" y="104" font-size="15" font-weight="700" fill="#0f172a" text-anchor="middle">Email arrives</text>
+  <line x1="480" y1="120" x2="480" y2="146" stroke="#64748b" stroke-width="1.5" marker-end="url(#a)"/>
+
+  <polygon points="350,196 480,150 610,196 480,242" fill="#eff6ff" stroke="#2563eb" stroke-width="2"/>
+  <text x="480" y="193" font-size="14" font-weight="700" fill="#1e3a8a" text-anchor="middle">Money or data ask?</text>
+  <text x="480" y="212" font-size="12" fill="#1e40af" text-anchor="middle">Nemotron Nano</text>
+  <line x1="610" y1="196" x2="650" y2="196" stroke="#64748b" stroke-width="1.5" marker-end="url(#a)"/>
+  <text x="660" y="200" font-size="13" fill="#64748b">No: a normal email, no checks, no label</text>
+  <text x="492" y="262" font-size="12" fill="#64748b">yes</text>
+  <path d="M480 242 V272 M165 272 H795 M165 272 V288 M480 272 V288 M795 272 V288" stroke="#64748b" stroke-width="1.5" fill="none"/>
+
+  <rect x="20" y="292" width="290" height="150" rx="12" fill="#ffffff" stroke="#93c5fd" stroke-width="1.5"/>
+  <rect x="20" y="292" width="290" height="40" rx="12" fill="#dbeafe"/><rect x="20" y="320" width="290" height="12" fill="#dbeafe"/>
+  <text x="36" y="318" font-size="15" font-weight="700" fill="#1e3a8a">Entity check · the sender</text>
+  <g font-size="13" fill="#334155"><text x="36" y="356">Sender vs your vendor records</text><text x="36" y="378">Known name, new address</text><text x="36" y="400">Free email address</text><text x="36" y="422">SPF, DKIM, DMARC, reply-to</text></g>
+
+  <rect x="335" y="292" width="290" height="150" rx="12" fill="#ffffff" stroke="#93c5fd" stroke-width="1.5"/>
+  <rect x="335" y="292" width="290" height="40" rx="12" fill="#dbeafe"/><rect x="335" y="320" width="290" height="12" fill="#dbeafe"/>
+  <text x="351" y="318" font-size="15" font-weight="700" fill="#1e3a8a">Org check · the company</text>
+  <g font-size="13" fill="#334155"><text x="351" y="356">Lookalike of known domains</text><text x="351" y="378">Domain age (RDAP)</text><text x="351" y="400">Official website and phone</text><text x="351" y="422">(Nemotron Super agent + Tavily)</text></g>
+
+  <rect x="650" y="292" width="290" height="150" rx="12" fill="#ffffff" stroke="#93c5fd" stroke-width="1.5"/>
+  <rect x="650" y="292" width="290" height="40" rx="12" fill="#dbeafe"/><rect x="650" y="320" width="290" height="12" fill="#dbeafe"/>
+  <text x="666" y="318" font-size="15" font-weight="700" fill="#1e3a8a">Content check · the request</text>
+  <g font-size="13" fill="#334155"><text x="666" y="356">Bank details vs your records</text><text x="666" y="378">Bank details in PDFs (Super VL)</text><text x="666" y="400">Urgency, secrecy (Nemotron Super)</text><text x="666" y="422">Writing style (Nemotron Super)</text></g>
+
+  <path d="M165 442 V462 M480 442 V462 M795 442 V462 M165 462 H795 M480 462 V478" stroke="#64748b" stroke-width="1.5" fill="none" marker-end="url(#a)"/>
+  <rect x="330" y="482" width="300" height="50" rx="10" fill="#1e3a8a"/>
+  <text x="480" y="513" font-size="15" font-weight="700" fill="#ffffff" text-anchor="middle">Rules-based scorer</text>
+  <line x1="480" y1="532" x2="480" y2="552" stroke="#64748b" stroke-width="1.5" marker-end="url(#a)"/>
+
+  <rect x="270" y="556" width="420" height="78" rx="12" fill="#dbeafe" stroke="#2563eb" stroke-width="2"/>
+  <text x="480" y="582" font-size="15" font-weight="700" fill="#1e3a8a" text-anchor="middle">Result card next to the email</text>
+  <text x="480" y="603" font-size="13" fill="#1e40af" text-anchor="middle">Verify before paying · Looks unusual · No issues found</text>
+  <text x="480" y="622" font-size="12" fill="#1e40af" text-anchor="middle">Worded by Nemotron Ultra; addresses and numbers checked by code</text>
+</svg>

@@ -1,0 +1,20 @@
+From: testvendor.26@outlook.com (display name: Quillbrook Dental Supply Billing)
+To: testorganization26@gmail.com
+Subject: Welcome to Quillbrook Dental Supply - first invoice QDS-30418
+Attach: QDS-30418.pdf
+Expected: Red label. Verify before paying (rule: new payee). Says Quillbrook but writes from outlook.com, free Outlook address, not in your records, not one of your vendors, no official website found, payment to an account with no record (ending 9055, read from the PDF).
+
+----- body (copy from here) -----
+Hi Jordan,
+
+Thank you for choosing Quillbrook Dental Supply as your new supplier for impression materials and sterilization pouches. As agreed with your office manager, please pay the attached first invoice QDS-30418 ($4,950.00) by Friday to activate your account and keep the opening discount:
+
+Bank: Lakeshore Commerce Bank
+Routing: 999000666
+Account: 000044019055
+
+Questions? Call our billing desk at (206) 555-0188.
+
+Best regards,
+Karen Mills
+Billing, Quillbrook Dental Supply

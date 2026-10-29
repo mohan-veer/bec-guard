@@ -26,6 +26,9 @@ INTROS = {
     Decision.NO_ISSUES_FOUND: "No warning signs in these checks:",
     None: "This email doesn't ask for money or data.",
 }
+# A first payment to a new account is checked as a precaution, not because the email looks fake.
+RULE_INTROS = {"new_payee": "This email asks you to pay a bank account you have no record of. Confirm it before the "
+                            "first payment:"}
 SECTIONS = ["The sender", "The company", "The request"]
 _GROUP_SECTION = {"entity": "The sender", "org": "The company", "content": "The request"}
 _CODE_SECTION = {"email_phone_mismatch": "The request", "email_phone_matches": "The request"}
@@ -175,7 +178,7 @@ def build_card(r: AnalysisResult, e: Email) -> Card:
                                                              evidence=s.data.get("evidence")) for s in in_section]))
     return Card(
         message_id=r.message_id, decision=r.decision, rule=r.rule, intent=r.intent.value,
-        headline=HEADLINES[r.decision], intro=INTROS[r.decision], action=_action(r, callbacks), explanation=None,
+        headline=HEADLINES[r.decision], intro=RULE_INTROS.get(r.rule, INTROS[r.decision]), action=_action(r, callbacks), explanation=None,
         sections=sections,
         looks_fine=[i.text for sec in sections for i in sec.items if i.tone == "ok"],
         looks_unusual=[i.text for sec in sections for i in sec.items if i.tone == "warn"],  # in card order

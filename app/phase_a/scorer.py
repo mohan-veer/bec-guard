@@ -34,6 +34,8 @@ RULES = [
     # A sender not on file claims a company whose official website (Super agent + Tavily) is somewhere else.
     ("unverified_company",     lambda i, s: {"web_consensus_mismatch", "first_contact"} <= _fired(s) and i != Intent.NONE, V),
     ("bank_change",            lambda i, s: "bank_change" in _fired(s) or i in (Intent.BANK_CHANGE, Intent.PAYROLL_CHANGE), V),
+    # Prevention first: an account with no record is confirmed before the first payment, even if nothing else is off.
+    ("new_payee",              lambda i, s: "new_payee_account" in _fired(s) and i != Intent.NONE,           V),
     ("gift_cards",             lambda i, s: i == Intent.GIFT_CARDS or "gift_card_request" in _fired(s),      V),
     ("sensitive_data",         lambda i, s: "sensitive_data_request" in _fired(s),                           V),
     ("any_strong_signal",      lambda i, s: _any_strong(s),                                                  V),
