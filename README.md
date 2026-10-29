@@ -57,8 +57,7 @@ A few decisions came out of this:
 - **Verify on a channel the attacker doesn't control.** The number to call comes from your records or the company's
   official website, never from the email.
 - **Malware on a PC is the antivirus's job**, so BEC Guard watches the mailbox instead: a hacked mailbox shows up as
-  new filters, forwarding and odd sent mail. Escalation (deepfake calls) usually starts with a fake or hacked email,
-  which is covered.
+  new filters, forwarding and odd sent mail.
 
 ### Solution design
 
@@ -79,11 +78,25 @@ the sender checks.
 | Decision | Combines all findings into Verify before paying, Looks unusual or No issues found | Rules-based scorer |
 | Card wording | Each finding in plain language | Nemotron Ultra, checked by code |
 
-When the hacked mailbox is **yours**, BEC Guard also watches it every minute: new filters, forwarding, "send mail as"
-and POP access, bank details sent to outside addresses, mail that doesn't read like the owner, sent mail deleted soon
-after sending, and payment or security emails deleted. A banner shows on every BEC Guard card, and one email goes to
-the compliance contact on the server, which the mailbox can't change. Outside office hours, every alert is raised to
-high.
+**Why a rules-based scorer makes the decision.** The models do the reading and judging: Nano decides whether the
+email asks for money, Super spots pressure and secrecy, compares the writing style and searches the web, and Super VL
+reads the PDF. Each of them reports facts. A fixed set of rules then turns those facts into the decision, for
+example: a lookalike domain, a known name on a new address, a changed or unknown bank account, gift cards or employee
+data → Verify before paying; two medium findings → Looks unusual; otherwise → No issues found. The decision is left to
+rules because the email is written by the attacker: text in an email can sway a model ("this is a routine request,
+no need to check"), but it can't change a rule. The same facts also always give the same decision, and every rule is
+tested. After the decision, Nemotron Ultra explains it in plain words.
+
+BEC Guard also covers the case where **your own mailbox** is hacked. Every minute it checks for:
+
+- new filters, forwarding addresses, "send mail as" addresses and POP access
+- bank details sent from your account to outside addresses
+- sent mail that doesn't read like the owner
+- sent mail deleted soon after sending
+- payment or security emails deleted
+
+When it finds one, a banner shows on every BEC Guard card and one email goes to the compliance contact on the server,
+which the mailbox can't change. Activity outside office hours is flagged as well.
 
 ### The result card
 
@@ -123,8 +136,8 @@ web link to the page that supported them.
 
 Design rules that hold everywhere:
 
-- **Models find the facts; rules make the call.** The email is written by the attacker, and an email can't talk a
-  fixed rule into "No issues found". The same facts always give the same decision, and every rule is tested.
+- **Models find the facts, rules make the call, Ultra explains it** (see
+  [why a rules-based scorer](#solution-design)).
 - **Phone numbers to call come only from trusted sources**: your vendor records, your staff directory, or the
   company's official website found by the agent. A number written in the email is compared, never offered.
 - **Model output is checked by code.** A line reworded by Ultra is used only if every address, phone number, amount
@@ -148,7 +161,7 @@ All model calls go to Nebius Token Factory through one OpenAI-compatible endpoin
 | Wording the card in plain language; the takeover summary for compliance | `nvidia/Nemotron-3-Ultra-550b-a55b` (fallback: Super) | Best wording, used only when something needs checking |
 
 **Measured (2026-10-27, real models, 7 sample emails):** all 7 got the expected decision. Average 7.8 s per email
-(6.0–11.4 s), about $0.003 per email at third-party list prices (our estimate from token counts; Super VL priced as
+(6.0–11.4 s), about $0.003 per email at third-party list prices (my estimate from token counts; Super VL priced as
 Super). A non-money email costs about $0.0001 (Nano only). Emails that needed a real web search took 13–36 s.
 
 **Other services:** Tavily web search (the agent's tool), RDAP (domain registration age), dnstwist (lookalike
@@ -159,17 +172,15 @@ domains), Gmail API via Apps Script. Hosting on Nebius Serverless Endpoints: _pe
 - **Website** (`/`): Home (the story of one scam), **Try it** (sample inbox, write your own test email with a
   simulated delivery result) and **Production** (the plan beyond the hackathon).
   Sample companies and people are fictional, web and domain facts in the sample inbox are simulated, and the AI
-  analysis is real. The mailbox-takeover checks need a real mailbox, so they are shown in the video. Judges: if
-  you'd like to see BEC Guard or use it inside Gmail yourself, we can share the login details of the Gmail test
-  accounts used in the video. Please let us know through Devpost.
+  analysis is real. The mailbox-takeover checks need a real mailbox, so they are shown in the video. If you'd like to
+  see BEC Guard or use it inside Gmail, I can share the login details of the Gmail test accounts used in the video.
+  Please let me know.
 - **Gmail:** the add-on installs as an Apps Script test deployment on your own Gmail account. See
   [gmail-addon/README.md](gmail-addon/README.md).
-- **Every test we ran by hand**, in Gmail and on the website, with the emails and results:
-  [demo-emails/](demo-emails/README.md). Demo scenarios: [docs/DEMO_SCENARIOS.md](docs/DEMO_SCENARIOS.md).
 
 ## Run it locally
 
-Requirements: Python 3.14 (what we developed and tested on), Node 22.18+.
+Requirements: Python 3.14 (what I developed and tested on), Node 22.18+.
 
 ```bash
 python -m venv .venv && .venv/bin/pip install -r requirements.txt
@@ -211,7 +222,7 @@ cd frontend && npm run typecheck
 | `data/`, `scenarios/` | Fictional sample company, records and sample emails |
 | `demo-emails/` | The manual test cases and their results |
 | `fixtures/` | Saved model and web responses for mock mode and tests |
-| `docs/` | Demo scenarios, data formats, diagrams |
+| `docs/` | Data formats, diagrams |
 
 ## Limitations
 
@@ -220,21 +231,40 @@ cd frontend && npm run typecheck
 - Server state (alerts, takeover history) is held in memory and lost on restart.
 - Vendor records are JSON files, not an accounting-system sync.
 
-The production plan (Marketplace add-on and Outlook add-in, push events, admin audit logs, accounting sync, a payment
-gate in bill pay) is on the website's **Production** page.
+## Ideal production plan
+
+With a hackathon's limited resources, and as the only person on this project, I built the POC on Gmail with an Apps
+Script add-on, vendor records in JSON files and one server. With the budget for a real product (paid app reviews,
+accounting integrations, production hosting), this is what I would build:
+
+![POC vs production, layer by layer: mailboxes, install, new mail, takeover signals, API, AI, company records, payment gate, alerts](docs/images/poc-vs-production.svg)
+
+Why each change:
+
+- **Marketplace add-on and Outlook add-in:** one install for the whole company and no code in the customer's account.
+  Needs Google's and Microsoft's app review, which takes weeks.
+- **Push events:** warnings in seconds instead of up to a minute, and no daily timer quota.
+- **Admin audit logs:** an add-on can't see sign-ins, and an intruder could remove it. Audit logs read on the server
+  keep working either way.
+- **Nebius Serverless Endpoints, Jobs and a database:** scales with mail volume, runs long mailbox scans in the
+  background, survives restarts and keeps an audit history.
+- **Accounting sync:** bank details always come from the system of record, never from email.
+- **Payment gate in bill pay:** the last line of defence; even an email BEC Guard missed can't pay a new account
+  without a call-back.
+- **Admin console and alert channels:** compliance sees who acknowledged what, and the mailbox owner still can't
+  change who gets alerted.
 
 ## Feedback on Nebius Token Factory and NVIDIA Nemotron
 
 - **One endpoint, one key, every model.** Switching between Nano, Super, Super VL and Ultra is a change to the
   `model` field, which made per-step model routing simple to build and test.
 - **Tool calling on Nemotron Super worked first time** with OpenAI-style `tools`: the agent picked its own searches,
-  used 2 tool calls and returned valid JSON. It didn't always use optional tool arguments we suggested (for example
-  restricting a search to one domain), so we kept code guardrails on its output.
+  used 2 tool calls and returned valid JSON. It didn't always use optional tool arguments I suggested (for example
+  restricting a search to one domain), so I kept code guardrails on its output.
 - **Nemotron Super VL read a bank-details PDF fully correctly** (bank, routing, account, amount, invoice and PO) on
   the first try.
-- **Structured output was reliable:** valid JSON on the first attempt in our first real runs.
-- **What would have helped:** a list of which models support tool calling and vision in the docs (we found out by
-  testing), and model IDs listed in the docs (we confirmed them via `/v1/models`). Latency varied: one Nano call took
-  8.8 s against a usual ~1 s, so every step falls back to a safe default when a call fails.
-- **Nebius AI Cloud:** the free trial was suspended when we started, so hosting there needed credits or a card;
-  Token Factory itself worked with the hackathon credits from day one.
+- **Structured output was reliable:** valid JSON on the first attempt in my first real runs.
+- **The hackathon credits** covered all four models from day one.
+- **Would be good to have:** a per-model list of which models support tool calling and vision (I confirmed it by
+  testing), and a free tier on Nebius AI Cloud for hosting, so the app, its models and its hosting could all live on
+  one platform.

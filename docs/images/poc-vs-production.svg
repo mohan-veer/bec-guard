@@ -1,0 +1,72 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 678" width="960" height="678" font-family="-apple-system, 'Segoe UI', Helvetica, Arial, sans-serif">
+  <defs><marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0 L10 5 L0 10z" fill="#2563eb"/></marker></defs>
+  <rect width="960" height="678" rx="16" fill="#ffffff"/>
+  <text x="20" y="36" font-size="20" font-weight="700" fill="#0f172a">POC (this hackathon) vs production</text>
+  <text x="20" y="58" font-size="13" fill="#64748b">The checks, the rules and the Nemotron models stay the same; how it is installed, hears about mail and gets its records changes.</text>
+  <text x="200" y="98" font-size="12" font-weight="700" fill="#0369a1" letter-spacing="1">POC · RUNNING TODAY</text>
+  <text x="570" y="98" font-size="12" font-weight="700" fill="#1e3a8a" letter-spacing="1">PRODUCTION · THE PLAN</text>
+  <text x="20" y="148.0" font-size="14" font-weight="700" fill="#0f172a">Mailboxes</text>
+  <rect x="200" y="118" width="320" height="50" rx="10" fill="#f0f9ff" stroke="#bae6fd" stroke-width="1.5"/>
+  <text x="214" y="147.0" font-size="12.5" fill="#0c4a6e">One Gmail test mailbox</text>
+  <line x1="526" y1="143.0" x2="562" y2="143.0" stroke="#2563eb" stroke-width="2" marker-end="url(#a)"/>
+  <rect x="570" y="118" width="370" height="50" rx="10" fill="#1e3a8a"/>
+  <text x="584" y="139" font-size="12.5" fill="#ffffff">Every mailbox in the company: Google Workspace</text>
+  <text x="584" y="156" font-size="12.5" fill="#ffffff">and Microsoft 365 (Outlook)</text>
+  <text x="20" y="208.0" font-size="14" font-weight="700" fill="#0f172a">Install</text>
+  <rect x="200" y="178" width="320" height="50" rx="10" fill="#f0f9ff" stroke="#bae6fd" stroke-width="1.5"/>
+  <text x="214" y="199" font-size="12.5" fill="#0c4a6e">Apps Script test deployment,</text>
+  <text x="214" y="216" font-size="12.5" fill="#0c4a6e">installed by hand</text>
+  <line x1="526" y1="203.0" x2="562" y2="203.0" stroke="#2563eb" stroke-width="2" marker-end="url(#a)"/>
+  <rect x="570" y="178" width="370" height="50" rx="10" fill="#1e3a8a"/>
+  <text x="584" y="199" font-size="12.5" fill="#ffffff">Workspace Marketplace add-on and Outlook add-in;</text>
+  <text x="584" y="216" font-size="12.5" fill="#ffffff">an admin installs it once for everyone</text>
+  <text x="20" y="268.0" font-size="14" font-weight="700" fill="#0f172a">New mail</text>
+  <rect x="200" y="238" width="320" height="50" rx="10" fill="#f0f9ff" stroke="#bae6fd" stroke-width="1.5"/>
+  <text x="214" y="267.0" font-size="12.5" fill="#0c4a6e">Checked every minute (Apps Script timer)</text>
+  <line x1="526" y1="263.0" x2="562" y2="263.0" stroke="#2563eb" stroke-width="2" marker-end="url(#a)"/>
+  <rect x="570" y="238" width="370" height="50" rx="10" fill="#1e3a8a"/>
+  <text x="584" y="259" font-size="12.5" fill="#ffffff">Push events: Gmail Pub/Sub and</text>
+  <text x="584" y="276" font-size="12.5" fill="#ffffff">Microsoft Graph notifications</text>
+  <text x="20" y="328.0" font-size="14" font-weight="700" fill="#0f172a">Takeover signals</text>
+  <rect x="200" y="298" width="320" height="50" rx="10" fill="#f0f9ff" stroke="#bae6fd" stroke-width="1.5"/>
+  <text x="214" y="319" font-size="12.5" fill="#0c4a6e">Inside the mailbox: filters, forwarding,</text>
+  <text x="214" y="336" font-size="12.5" fill="#0c4a6e">sent and deleted mail</text>
+  <line x1="526" y1="323.0" x2="562" y2="323.0" stroke="#2563eb" stroke-width="2" marker-end="url(#a)"/>
+  <rect x="570" y="298" width="370" height="50" rx="10" fill="#1e3a8a"/>
+  <text x="584" y="319" font-size="12.5" fill="#ffffff">Plus admin audit logs (sign-ins, rule changes),</text>
+  <text x="584" y="336" font-size="12.5" fill="#ffffff">read on the server</text>
+  <text x="20" y="388.0" font-size="14" font-weight="700" fill="#0f172a">BEC Guard API</text>
+  <rect x="200" y="358" width="320" height="50" rx="10" fill="#f0f9ff" stroke="#bae6fd" stroke-width="1.5"/>
+  <text x="214" y="387.0" font-size="12.5" fill="#0c4a6e">One FastAPI server, state held in memory</text>
+  <line x1="526" y1="383.0" x2="562" y2="383.0" stroke="#2563eb" stroke-width="2" marker-end="url(#a)"/>
+  <rect x="570" y="358" width="370" height="50" rx="10" fill="#1e3a8a"/>
+  <text x="584" y="379" font-size="12.5" fill="#ffffff">Nebius Serverless Endpoints and Serverless Jobs,</text>
+  <text x="584" y="396" font-size="12.5" fill="#ffffff">with a database</text>
+  <text x="20" y="448.0" font-size="14" font-weight="700" fill="#0f172a">AI</text>
+  <rect x="200" y="418" width="320" height="50" rx="10" fill="#f0f9ff" stroke="#bae6fd" stroke-width="1.5"/>
+  <text x="214" y="447.0" font-size="12.5" fill="#0c4a6e">Nemotron on Nebius Token Factory</text>
+  <line x1="526" y1="443.0" x2="562" y2="443.0" stroke="#2563eb" stroke-width="2" marker-end="url(#a)"/>
+  <rect x="570" y="418" width="370" height="50" rx="10" fill="#dbeafe"/>
+  <text x="584" y="447.0" font-size="12.5" fill="#1e3a8a">Same models, same routing</text>
+  <text x="926" y="447.0" font-size="11" font-weight="700" fill="#1e40af" text-anchor="end">unchanged</text>
+  <text x="20" y="508.0" font-size="14" font-weight="700" fill="#0f172a">Company records</text>
+  <rect x="200" y="478" width="320" height="50" rx="10" fill="#f0f9ff" stroke="#bae6fd" stroke-width="1.5"/>
+  <text x="214" y="507.0" font-size="12.5" fill="#0c4a6e">JSON files on the server</text>
+  <line x1="526" y1="503.0" x2="562" y2="503.0" stroke="#2563eb" stroke-width="2" marker-end="url(#a)"/>
+  <rect x="570" y="478" width="370" height="50" rx="10" fill="#1e3a8a"/>
+  <text x="584" y="507.0" font-size="12.5" fill="#ffffff">Read-only sync from QuickBooks, Xero or NetSuite</text>
+  <text x="20" y="568.0" font-size="14" font-weight="700" fill="#0f172a">Payment gate</text>
+  <rect x="200" y="538" width="320" height="50" rx="10" fill="#f0f9ff" stroke="#bae6fd" stroke-width="1.5"/>
+  <text x="214" y="567.0" font-size="12.5" fill="#0c4a6e">Warning in the mailbox only</text>
+  <line x1="526" y1="563.0" x2="562" y2="563.0" stroke="#2563eb" stroke-width="2" marker-end="url(#a)"/>
+  <rect x="570" y="538" width="370" height="50" rx="10" fill="#1e3a8a"/>
+  <text x="584" y="559" font-size="12.5" fill="#ffffff">Hold in bill pay until a new bank account</text>
+  <text x="584" y="576" font-size="12.5" fill="#ffffff">is confirmed by phone</text>
+  <text x="20" y="628.0" font-size="14" font-weight="700" fill="#0f172a">Alerts and history</text>
+  <rect x="200" y="598" width="320" height="50" rx="10" fill="#f0f9ff" stroke="#bae6fd" stroke-width="1.5"/>
+  <text x="214" y="627.0" font-size="12.5" fill="#0c4a6e">Banner and an email to compliance</text>
+  <line x1="526" y1="623.0" x2="562" y2="623.0" stroke="#2563eb" stroke-width="2" marker-end="url(#a)"/>
+  <rect x="570" y="598" width="370" height="50" rx="10" fill="#1e3a8a"/>
+  <text x="584" y="619" font-size="12.5" fill="#ffffff">Admin console with roles; alerts by email,</text>
+  <text x="584" y="636" font-size="12.5" fill="#ffffff">Slack or Teams</text>
+</svg>
