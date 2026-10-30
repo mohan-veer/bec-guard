@@ -1,10 +1,11 @@
 # BEC Guard
 
-**Checks payment requests in email before you pay.** BEC Guard sits inside Gmail. When an email asks for money or
-data, it tells the person about to pay what doesn't add up, and who to call before they do. Built for the
-Nebius × NVIDIA Global AI Hackathon (Best Apps and Agents track) with NVIDIA Nemotron models on Nebius Token Factory.
+**Checks payment requests in email before you pay.** BEC Guard is a backend service that checks every email asking for
+money or data with NVIDIA Nemotron models, plus a Gmail add-on that brings the result into the inbox. It tells the
+person about to pay what doesn't add up, and who to call before they do. Built for the Nebius × NVIDIA Global AI
+Hackathon (Best Apps and Agents track) with NVIDIA Nemotron models on Nebius Token Factory.
 
-- **Live demo:** [bec-guard.onrender.com](https://bec-guard.onrender.com) · **Video:** _TBD_
+- **Live demo:** [bec-guard.onrender.com](https://bec-guard.onrender.com) · **Video:** [youtube.com/watch?v=kkVMPMBzdgk](https://www.youtube.com/watch?v=kkVMPMBzdgk)
 - **License:** [MIT](LICENSE)
 
 ## The problem
@@ -154,6 +155,17 @@ web link to the page that supported them.
 
 ## How it works
 
+BEC Guard has two parts:
+
+- **The backend** (FastAPI, deployed on Render) does all the work. It runs the checks with Nemotron models on Nebius
+  Token Factory, compares each request with the company's records, and makes the decision. It exposes one API that
+  any mail client can call, with a separate key for each company.
+- **The Gmail add-on** (Google Apps Script) is a thin connector. It sends new mail and mailbox changes to the API and
+  shows the result next to the email.
+
+An Outlook add-in would call the same API. Gmail is the one connected in this hackathon because it allows this kind of
+integration for free; the Outlook integration needs a paid Microsoft Azure account.
+
 ![The Gmail add-on sends new mail and mailbox changes to the BEC Guard API, which runs the email check and the mailbox takeover checks with Nemotron models on Nebius Token Factory, web lookups and the company's records](docs/images/architecture.svg)
 
 Design rules that hold everywhere:
@@ -257,8 +269,9 @@ cd frontend && npm run typecheck
 ## Ideal production plan
 
 With a hackathon's limited resources, and as the only person on this project, I built the POC on Gmail with an Apps
-Script add-on, vendor records in JSON files and one server. With the budget for a real product (paid app reviews,
-accounting integrations, production hosting), this is what I would build:
+Script add-on, vendor records in JSON files and one server. With the budget for a real product (Google's review and
+security assessment for a published Gmail add-on, a Microsoft Azure account for Outlook, accounting integrations,
+production hosting), this is what I would build:
 
 ![POC vs production, layer by layer: mailboxes, install, new mail, takeover signals, API, AI, company records, payment gate, alerts](docs/images/poc-vs-production.svg)
 
