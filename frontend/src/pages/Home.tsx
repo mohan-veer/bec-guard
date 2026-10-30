@@ -1,4 +1,4 @@
-import Scenario from "../components/Scenario";
+import StoryPlayer from "../components/StoryPlayer";
 
 const WAYS = [
   {
@@ -27,36 +27,30 @@ const STEPS = [
 export default function Home() {
   return (
     <main>
-      <section className="mx-auto grid max-w-6xl items-center gap-8 px-4 py-10 lg:grid-cols-[minmax(0,5fr)_minmax(0,7fr)] lg:py-14">
-        <div>
-          <p className="text-sm font-semibold uppercase tracking-wide text-blue-600">Business email compromise</p>
-          <h2 className="mt-2 text-4xl font-semibold tracking-tight text-slate-900 sm:text-5xl">
-            One email. One wrong bank account. The money is gone.
-          </h2>
-          <p className="mt-4 text-lg text-slate-600">
-            Business email compromise cost victims <strong className="text-slate-900">$3 billion</strong> in 2025,
-            second only to investment fraud{" "}
-            <a href="https://www.ic3.gov/AnnualReport/Reports/2025_IC3Report.pdf" target="_blank" rel="noreferrer"
-              className="text-sm text-blue-700 underline">(FBI Internet Crime Report 2025, p. 8)</a>.
-            BEC Guard sits inside Gmail and tells the person about to pay what doesn't add up, and who to call
-            before they do.
-          </p>
-          <div className="mt-6 flex flex-wrap gap-3">
-            <a href="#how" className="rounded-lg bg-blue-600 px-5 py-2.5 text-sm font-medium text-white shadow-sm hover:bg-blue-700"
-              onClick={(e) => { e.preventDefault(); document.getElementById("how")?.scrollIntoView({ behavior: "smooth" }); }}>
-              How it works
-            </a>
-            <a href="#try" className="rounded-lg border border-slate-300 bg-white px-5 py-2.5 text-sm font-medium text-slate-700 hover:bg-slate-50">
-              Try it
-            </a>
-          </div>
+      <section className="mx-auto max-w-5xl px-4 pt-10 pb-12">
+        <p className="text-sm font-semibold uppercase tracking-wide text-blue-600">Business email compromise</p>
+        <h2 className="mt-2 text-3xl font-semibold tracking-tight text-slate-900 sm:text-4xl">
+          One email. One wrong bank account. The money is gone.
+        </h2>
+        <p className="mt-3 text-slate-600">
+          Business email compromise cost victims <strong className="text-slate-900">$3 billion</strong> in 2025,
+          second only to investment fraud{" "}
+          <a href="https://www.ic3.gov/AnnualReport/Reports/2025_IC3Report.pdf" target="_blank" rel="noreferrer"
+            className="text-sm text-blue-700 underline">(FBI Internet Crime Report 2025, p. 8)</a>.
+          Watch how one payment scam happens, then see how BEC Guard stops it.
+        </p>
+        <div className="mt-6">
+          <StoryPlayer onDone={() => document.getElementById("ways")?.scrollIntoView({ behavior: "smooth" })} />
         </div>
-        <Scenario />
       </section>
 
-      <section aria-labelledby="ways" className="border-y border-slate-200 bg-white">
+      <section aria-labelledby="ways" className="scroll-mt-16 border-y border-slate-200 bg-white">
         <div className="mx-auto max-w-6xl px-4 py-12">
-          <h2 id="ways" className="text-2xl font-semibold">Three ways the money gets stolen</h2>
+          <h2 id="ways" className="text-2xl font-semibold">How BEC Guard stops it</h2>
+          <p className="mt-2 max-w-3xl text-slate-600">
+            BEC Guard sits inside Gmail. It checks every email that asks for money or data, before anyone pays, and
+            covers the three ways the money gets stolen.
+          </p>
           <ol className="mt-6 grid gap-4 md:grid-cols-3">
             {WAYS.map((w, i) => (
               <li key={w.title} className="rounded-xl border border-slate-200 p-5">

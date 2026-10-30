@@ -4,7 +4,7 @@
 data, it tells the person about to pay what doesn't add up, and who to call before they do. Built for the
 Nebius × NVIDIA Global AI Hackathon (Best Apps and Agents track) with NVIDIA Nemotron models on Nebius Token Factory.
 
-- **Live demo:** _TBD (deploy pending)_ · **Video:** _TBD_
+- **Live demo:** [bec-guard.onrender.com](https://bec-guard.onrender.com) · **Video:** _TBD_
 - **License:** [MIT](LICENSE)
 
 ## The problem
@@ -187,7 +187,8 @@ All model calls go to Nebius Token Factory through one OpenAI-compatible endpoin
 Super). A non-money email costs about $0.0001 (Nano only). Emails that needed a real web search took 13–36 s.
 
 **Other services:** Tavily web search (the agent's tool), RDAP (domain registration age), dnstwist (lookalike
-domains), Gmail API via Apps Script. Hosting on Nebius Serverless Endpoints: _pending_.
+domains), Gmail API via Apps Script. The demo is hosted on Render's free tier; hosting on Nebius Serverless
+Endpoints is part of the [production plan](#ideal-production-plan).
 
 ## Try it
 

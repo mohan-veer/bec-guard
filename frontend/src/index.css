@@ -9,14 +9,9 @@ body {
   @apply bg-slate-50 text-slate-900 antialiased;
 }
 
-/* Home page scenario (components/Scenario.tsx) */
-@keyframes bg-pop { 0% { transform: translateY(-14px); opacity: 0 } 60% { transform: translateY(3px); opacity: 1 } 100% { transform: none } }
-@keyframes bg-fly { 0% { transform: translate(0, 0); opacity: 1 } 85% { opacity: 1 } 100% { transform: translate(330px, 110px); opacity: 0 } }
-@keyframes bg-mail { 0% { transform: translate(0, 0); opacity: 1 } 100% { transform: translate(-90px, -80px); opacity: 0 } }
-.anim-pop { animation: bg-pop .6s ease-out both }
-.anim-fly { animation: bg-fly 1.4s ease-in both }
-.anim-mail { animation: bg-mail 1.2s ease-in .3s both }
-@media (prefers-reduced-motion: reduce) { .anim-pop, .anim-fly, .anim-mail { animation: none } }
+/* Home page story (components/StoryPlayer.tsx): bills fly from Jordan's screen to the attacker's bank */
+@keyframes bg-billfly { 0% { transform: translate(0, 0); opacity: 1 } 85% { opacity: 1 } 100% { transform: translate(990px, -40px); opacity: 0 } }
+.anim-billfly { animation: bg-billfly 1.5s ease-in both }
 
 /* Production architecture: dashes flow along each arrow */
 @keyframes bg-flow { to { stroke-dashoffset: -24 } }

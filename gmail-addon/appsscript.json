@@ -14,7 +14,7 @@
     "https://www.googleapis.com/auth/script.scriptapp",
     "https://www.googleapis.com/auth/script.send_mail"
   ],
-  "urlFetchWhitelist": ["https://*.trycloudflare.com/", "https://*.hf.space/"],
+  "urlFetchWhitelist": ["https://bec-guard.onrender.com/", "https://*.trycloudflare.com/", "https://*.hf.space/"],
   "addOns": {
     "common": {
       "name": "BEC Guard",
